@@ -1,0 +1,225 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Web服务器备份文件 | Bubble's Blogs</title><meta name="author" content="Bubble"><meta name="copyright" content="Bubble"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Web 服务器源代码备份文件 指的是在 Web 应用程序开发、部署、维护过程中产生的，包含当前或历史源代码的文件或数据集合的副本。其主要目的是为了在代码被错误修改、损坏或需要回滚时提供一个恢复点。 备份文件的主要类型与产生方式：  开发者手动创建： 常见后缀： .bak, .backup, .old, .save, ~(临时编辑文件) 添加到原始文件名后 (e.g., index.php.bak,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Web服务器备份文件">
+<meta property="og:url" content="http://example.com/2025/08/04/Web%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%BA%90%E4%BB%A3%E7%A0%81%E5%A4%87%E4%BB%BD%E6%96%87%E4%BB%B6/index.html">
+<meta property="og:site_name" content="Bubble&#39;s Blogs">
+<meta property="og:description" content="Web 服务器源代码备份文件 指的是在 Web 应用程序开发、部署、维护过程中产生的，包含当前或历史源代码的文件或数据集合的副本。其主要目的是为了在代码被错误修改、损坏或需要回滚时提供一个恢复点。 备份文件的主要类型与产生方式：  开发者手动创建： 常见后缀： .bak, .backup, .old, .save, ~(临时编辑文件) 添加到原始文件名后 (e.g., index.php.bak,">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/image/%E5%A4%B4%E5%83%8F.jpg">
+<meta property="article:published_time" content="2025-08-03T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-08-04T10:42:25.442Z">
+<meta property="article:author" content="Bubble">
+<meta property="article:tag" content="备份安全">
+<meta property="article:tag" content="源码泄露">
+<meta property="article:tag" content="安全漏洞">
+<meta property="article:tag" content="Git安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/image/%E5%A4%B4%E5%83%8F.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Web服务器备份文件",
+  "url": "http://example.com/2025/08/04/Web%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%BA%90%E4%BB%A3%E7%A0%81%E5%A4%87%E4%BB%BD%E6%96%87%E4%BB%B6/",
+  "image": "http://example.com/image/%E5%A4%B4%E5%83%8F.jpg",
+  "datePublished": "2025-08-03T16:00:00.000Z",
+  "dateModified": "2025-08-04T10:42:25.442Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Bubble",
+      "url": "http://example.com"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/image/ico.jpg"><link rel="canonical" href="http://example.com/2025/08/04/Web%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%BA%90%E4%BB%A3%E7%A0%81%E5%A4%87%E4%BB%BD%E6%96%87%E4%BB%B6/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Web服务器备份文件',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/messageboard/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/image/%E8%83%8C%E6%99%AF.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">Bubble's Blogs</span></a><a class="nav-page-title" href="/"><span class="site-name">Web服务器备份文件</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/messageboard/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Web服务器备份文件</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-08-03T16:00:00.000Z" title="发表于 2025-08-04 00:00:00">2025-08-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-08-04T10:42:25.442Z" title="更新于 2025-08-04 18:42:25">2025-08-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/CTF/">CTF</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">688</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>2分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Web-服务器源代码备份文件"><a href="#Web-服务器源代码备份文件" class="headerlink" title="Web 服务器源代码备份文件"></a><strong>Web 服务器源代码备份文件</strong></h1><ul>
+<li><p>指的是在 Web 应用程序开发、部署、维护过程中产生的，包含当前或历史源代码的文件或数据集合的副本。其主要目的是为了在代码被错误修改、损坏或需要回滚时提供一个恢复点。</p>
+<p><strong>备份文件的主要类型与产生方式：</strong></p>
+<ol>
+<li><strong>开发者手动创建</strong>：<ul>
+<li><strong>常见后缀：</strong> <code>.bak</code>, <code>.backup</code>, <code>.old</code>, <code>.save</code>, <code>~</code>(临时编辑文件) 添加到原始文件名后 (e.g., <code>index.php.bak</code>, <code>config.inc.php.old</code>)。</li>
+<li><strong>行为动机：</strong> 在修改关键文件前习惯性地创建一个“安全网”。</li>
+</ul>
+</li>
+<li><strong>编辑器&#x2F;IDE 自动生成</strong>：<ul>
+<li><strong>交换文件 (Vim)：</strong> <code>.filename.swp</code>, <code>.filename.swo</code>, <code>.filename.swn</code>。在 Vim 编辑文件时自动生成，用于崩溃恢复。如果编辑异常结束，这些文件会残留。</li>
+<li><strong>临时文件&#x2F;备份 (Emacs, 其他编辑器)：</strong> <code>filename~</code>, <code>#filename#</code>。</li>
+<li><strong>操作系统特定 (macOS)：</strong> <code>.DS_Store</code>文件存储文件夹的自定义属性（视图设置、图标位置等），泄露目录结构信息。</li>
+</ul>
+</li>
+<li><strong>压缩归档备份</strong>：<ul>
+<li><strong>形式：</strong> <code>backup.zip</code>, <code>website_20230815.tar.gz</code>, <code>wwwroot.rar</code>。通常包含整个站点目录的副本。</li>
+<li><strong>动机：</strong> 定期手动备份或迁移前打包。</li>
+</ul>
+</li>
+<li><strong>版本控制系统残留</strong>：<ul>
+<li><strong>Git：</strong> <code>.git/</code>目录及其内部文件 (HEAD, index, objects, logs 等)。<strong>这是最危险的泄露之一。</strong></li>
+<li><strong>Subversion (SVN)：</strong> <code>.svn/</code>目录。</li>
+<li><strong>Mercurial (Hg)：</strong> <code>.hg/</code>目录。</li>
+<li><strong>风险：</strong> 不仅泄露当前代码状态，还泄露整个项目历史（包括已“删除”的文件）、所有分支、可能暂存但未提交的更改、提交日志中的敏感信息描述。<code>.git/index</code>文件可能会暴露服务器上存在但不一定在 Web 根目录的文件。</li>
+</ul>
+</li>
+<li><strong>部署&#x2F;迁移遗留</strong>：<ul>
+<li>将本地开发环境的完整目录（包含 <code>.git</code>, <code>.idea</code>, 本地备份文件、测试脚本）直接上传或复制到线上服务器 Web 目录。</li>
+<li>备份脚本运行后未清理临时打包文件或未正确指定备份路径。</li>
+</ul>
+</li>
+</ol>
+<p><strong>为什么备份文件会出现在线上环境？</strong></p>
+<ul>
+<li><strong>疏忽与坏习惯：</strong><ul>
+<li>开发者&#x2F;管理员直接在生产服务器 Web 目录修改文件时创建了备份。</li>
+<li>本地开发环境打包上传时没有清理调试文件、备份文件或版本控制目录。</li>
+<li>部署脚本不严谨，误包含了不应上传的文件。</li>
+<li>忘记删除用于紧急回滚而创建的临时备份。</li>
+</ul>
+</li>
+<li><strong>对风险认识不足：</strong> 低估了源代码和配置文件泄露的潜在危害，认为临时备份文件不会那么容易被发现。</li>
+<li><strong>配置管理混乱：</strong> 缺乏统一的、安全的代码部署和备份流程。</li>
+</ul>
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">Bubble</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2025/08/04/Web%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%BA%90%E4%BB%A3%E7%A0%81%E5%A4%87%E4%BB%BD%E6%96%87%E4%BB%B6/">http://example.com/2025/08/04/Web 服务器源代码备份文件/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="http://example.com" target="_blank">Bubble's Blogs</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%A4%87%E4%BB%BD%E5%AE%89%E5%85%A8/">备份安全</a><a class="post-meta__tags" href="/tags/%E6%BA%90%E7%A0%81%E6%B3%84%E9%9C%B2/">源码泄露</a><a class="post-meta__tags" href="/tags/%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E/">安全漏洞</a><a class="post-meta__tags" href="/tags/Git%E5%AE%89%E5%85%A8/">Git安全</a></div><div class="post-share"><div class="social-share" data-image="/image/%E5%A4%B4%E5%83%8F.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/08/04/Robots%E5%8D%8F%E8%AE%AE/" title="Robots协议深度解析：爬虫规范与安全实践"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Robots协议深度解析：爬虫规范与安全实践</div></div><div class="info-2"><div class="info-item-1">Robots协议Robots 协议是网站管理员用来指导网络爬虫（如搜索引擎蜘蛛）如何抓取网站内容的非强制性约定，核心通过根目录下的 robots.txt 文件实现。以下是关键知识点解析：  一、核心作用 访问控制： 告知合规爬虫哪些目录或文件​​禁止抓取​​（例如后台、日志、测试页面）。 优化资源： 避免爬虫浪费带宽抓取无价值页面（如重复内容、图片素材库）。 聚焦重点： 引导搜索引擎优先收录重要页面（如使用 Sitemap 指令）。   注意：  非强制约束：恶意爬虫可无视该协议。 不保护敏感数据：robots.txt 本身公开可读，禁止抓取≠禁止访问。    二、robots.txt 文件规范1. 基础语法 位置：必须位于网站根目录（https://example.com/robots.txt）。 编码：UTF-8 文本格式。 指令（区分大小写）：     指令 作用 示例    User-agent 指定目标爬虫（* 表示所有） User-agent: Googlebot   Disallow 禁止抓取的路径 Disallow: /admin/   Allow 例外允许抓取的...</div></div></div></a><a class="pagination-related" href="/2025/08/04/Cookie/" title="Cookie基础知识"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Cookie基础知识</div></div><div class="info-2"><div class="info-item-1">Cookie网页的Cookie（通常简称为“Cookie”，中文常翻译为“饼干”）是网站存储在用户浏览器中的一小段文本信息。 它的主要目的是让网站能够“记住”用户的信息或用户在网站上的行为，从而提供更个性化、更便捷的浏览体验。 以下是Cookie的详细解释： 1. 核心作用：状态管理  HTTP协议（网页访问的基础协议）本质上是“无状态”的。这意味着每次用户点击一个新链接、刷新页面或浏览网站的不同部分时，服务器都会将其视为一次全新的、独立的访问。 Cookie 解决了这个“无状态”问题。它允许网站在用户的浏览器上存储一点信息。当用户下次访问同一个网站时，浏览器会自动将之前存储的Cookie发送回服务器。 这样，服务器就能“认出”这是之前访问过的某个用户（或会话），并根据Cookie中存储的信息来提供相应的内容或服务。  2. 常见的用途：  登录状态保持： 这是最常见的用途之一。当你登录一个网站（如邮箱、社交媒体、购物网站），该网站会放置一个Cookie在你的浏览器中，通常包含一个唯一的会话ID（身份标识）。之后你浏览网站的各个页面时，浏览器都会发送这个Cookie，服务器通过这...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Bubble</div><div class="author-info-description">Seek the light to meet,walk in its glow</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/bubble-xd"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">你若盛开，蝴蝶自来</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Web-%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%BA%90%E4%BB%A3%E7%A0%81%E5%A4%87%E4%BB%BD%E6%96%87%E4%BB%B6"><span class="toc-number">1.</span> <span class="toc-text">Web 服务器源代码备份文件</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/04/Cookie/" title="Cookie基础知识">Cookie基础知识</a><time datetime="2025-08-03T16:00:00.000Z" title="发表于 2025-08-04 00:00:00">2025-08-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/04/Web%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%BA%90%E4%BB%A3%E7%A0%81%E5%A4%87%E4%BB%BD%E6%96%87%E4%BB%B6/" title="Web服务器备份文件">Web服务器备份文件</a><time datetime="2025-08-03T16:00:00.000Z" title="发表于 2025-08-04 00:00:00">2025-08-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/04/Robots%E5%8D%8F%E8%AE%AE/" title="Robots协议深度解析：爬虫规范与安全实践">Robots协议深度解析：爬虫规范与安全实践</a><time datetime="2025-08-03T16:00:00.000Z" title="发表于 2025-08-04 00:00:00">2025-08-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/04/PHP%20%E5%BC%B1%E7%B1%BB%E5%9E%8B%E7%89%B9%E6%80%A7/" title="PHP弱类型特性总结">PHP弱类型特性总结</a><time datetime="2025-08-03T16:00:00.000Z" title="发表于 2025-08-04 00:00:00">2025-08-04</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By Bubble</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.4.3</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async src="https://npm.elemecdn.com/tzy-blog/lib/js/other/sakura.js"></script><script defer="defer" id="fluttering_ribbon" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z\d\-\.\+]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(t.test(e.href)||r.test(e.href))&&(e.href=a.dataset.original)})});</script><script>(r=>{r.imageLazyLoadSetting.processImages=t;var a=r.imageLazyLoadSetting.isSPA,o=r.imageLazyLoadSetting.preloadRatio||1,d=i();function i(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(t){(a||t)&&(d=i());for(var e,n=0;n<d.length;n++)0<=(e=(e=d[n]).getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(r.innerHeight*o||document.documentElement.clientHeight*o)&&(()=>{var t,e,a,o,i=d[n];e=function(){d=d.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).dataset.loaded||(t.hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(a=new Image,o=t.getAttribute("data-original"),a.onload=function(){t.src=o,t.removeAttribute("data-original"),t.setAttribute("data-loaded",!0),e&&e()},a.onerror=function(){t.removeAttribute("data-original"),t.setAttribute("data-loaded",!1),t.src=o},t.src!==o&&(a.src=o)))})()}function e(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",e),r.addEventListener("resize",e),r.addEventListener("orientationchange",e)})(this);</script></body></html>

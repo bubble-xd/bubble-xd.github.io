@@ -4,13 +4,122 @@
   
     
     <entry>
-      <title>Hello World</title>
-      <link href="/2025/08/03/hello-world/"/>
-      <url>/2025/08/03/hello-world/</url>
+      <title>Cookie基础知识</title>
+      <link href="/2025/08/04/Cookie/"/>
+      <url>/2025/08/04/Cookie/</url>
       
-        <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>]]></content>
+        <content type="html"><![CDATA[<h1 id="Cookie"><a href="#Cookie" class="headerlink" title="Cookie"></a>Cookie</h1><p>网页的Cookie（通常简称为“Cookie”，中文常翻译为“饼干”）是<strong>网站存储在用户浏览器中的一小段文本信息</strong>。</p><p>它的主要目的是让网站能够“记住”用户的信息或用户在网站上的行为，从而提供更个性化、更便捷的浏览体验。</p><p>以下是Cookie的详细解释：</p><p><strong>1. 核心作用：状态管理</strong></p><ul><li>HTTP协议（网页访问的基础协议）本质上是“无状态”的。这意味着每次用户点击一个新链接、刷新页面或浏览网站的不同部分时，服务器都会将其视为一次全新的、独立的访问。</li><li>Cookie 解决了这个“无状态”问题。它允许网站在用户的浏览器上存储一点信息。当用户<strong>下次访问同一个网站时</strong>，浏览器会自动将之前存储的Cookie发送回服务器。</li><li>这样，服务器就能“认出”这是之前访问过的某个用户（或会话），并根据Cookie中存储的信息来提供相应的内容或服务。</li></ul><p><strong>2. 常见的用途：</strong></p><ul><li><strong>登录状态保持：</strong> 这是最常见的用途之一。当你登录一个网站（如邮箱、社交媒体、购物网站），该网站会放置一个Cookie在你的浏览器中，通常包含一个唯一的会话ID（身份标识）。之后你浏览网站的各个页面时，浏览器都会发送这个Cookie，服务器通过这个ID就知道“哦，你已经登录了，是用户XX”，而无需你每访问一个新页面就重新输入密码。</li><li><strong>偏好设置：</strong> 网站可以记住你的语言偏好、主题设置（亮色&#x2F;暗色模式）、字体大小、地区等。下次访问时，网站会根据Cookie里的设置直接呈现你喜欢的样子。</li><li><strong>购物车：</strong> 在电商网站上，即使你没有登录或者没有结算，你加进购物车的商品信息通常也会保存在Cookie里，确保你关闭浏览器再回来时东西还在。</li><li><strong>个性化内容：</strong> 新闻网站或视频平台可能根据你之前的浏览历史（记录在Cookie中）推荐你可能感兴趣的内容。</li><li><strong>用户行为追踪（常与广告相关）：</strong> 广告商和网站运营者经常使用Cookie（尤其是第三方Cookie，见下文）来追踪用户在不同网站上的行为，了解他们的兴趣，从而投放更有针对性的广告。</li></ul><p><strong>3. Cookie 的关键特性：</strong></p><ul><li><strong>存储在客户端（用户浏览器）：</strong> Cookie保存在用户的设备（电脑、手机、平板）上的浏览器中。每个浏览器、每台设备的存储都是独立的。</li><li><strong>键值对：</strong> Cookie的内容通常是简单的“名称&#x3D;值”格式的文本（例如：<code>username=john_doe; session_id=abc123xyz</code>）。文本，不能存储可执行代码（理论上很安全）。</li><li><strong>有过期时间：</strong></li><li><strong>会话 Cookie：</strong> 没有设置过期时间，只在当前浏览器会话期间有效（当用户关闭浏览器窗口时会被自动删除）。</li><li><strong>持久 Cookie：</strong> 设置了过期时间。在达到这个时间之前，即使关闭浏览器，再次打开访问网站时仍然有效。过期后会被浏览器删除。</li><li><strong>作用域：</strong></li><li><strong>域名：</strong> 明确Cookie属于哪个网站（或域下的哪些子域）。浏览器只会在访问该域名或其指定的子域时发送该Cookie。</li><li><strong>路径：</strong> 可以限制Cookie只在网站的特定路径（子目录）下才发送。</li><li><strong>安全性设置：</strong></li><li><code>Secure</code>属性：要求浏览器只能通过安全的HTTPS连接发送此Cookie。</li><li><code>HttpOnly</code>属性：阻止JavaScript访问此Cookie（有助于防止跨站脚本攻击窃取登录Cookie）。</li><li><code>SameSite</code>属性：限制浏览器何时发送Cookie。<code>Strict</code>：仅在同站点请求时发送（最安全但可能影响用户体验）；<code>Lax</code>：在安全导航到该站点时发送（如点击链接进入）；<code>None</code>：允许在任何跨站请求中发送（需同时设置<code>Secure</code>）。</li></ul><p><strong>4. 主要类型：</strong></p><ul><li><strong>第一方 Cookie：</strong> 由用户当前正在访问的网站（地址栏中显示的域名）直接设置和读取。主要用于上述的登录、偏好、购物车等功能，提升用户体验。通常被认为更可接受。</li><li><strong>第三方 Cookie：</strong> 由用户当前访问的网站上嵌入的其他来源（如广告网络、社交分享按钮、分析服务）设置和读取。主要用于跨站跟踪用户行为和投放定向广告。这引发了最大的隐私顾虑，许多现代浏览器（如Safari， Firefox）默认阻止第三方Cookie，Chrome也在逐步淘汰。</li></ul><p><strong>5. 隐私与安全：</strong></p><ul><li><strong>隐私问题：</strong> Cookie（尤其是第三方追踪Cookie）允许构建详细的用户画像，许多用户担心自己的上网行为被过度跟踪。为此诞生了GDPR（欧盟通用数据保护条例）等法规，要求网站在设置非必需的Cookie（尤其是用于追踪的）之前，必须明确征得用户的同意（这就是为什么很多网站都有“Cookie同意弹窗”）。</li><li><strong>安全问题：</strong> 虽然Cookie本身是文本无害，但如果被盗取（例如通过XSS攻击），攻击者可能会冒充用户身份进行登录（会话劫持）。使用<code>Secure</code>和<code>HttpOnly</code>属性可以提升安全性。</li></ul><p><strong>总结：</strong></p><p>网页Cookie是一种存放在用户浏览器中的小型文本文件，用于在无状态的HTTP协议下维护状态信息。它让网站能够“记住”用户（会话）、偏好设置或行为数据，从而提供个性化体验（如保持登录、记住购物车）。</p><p>然而，尤其是在用于跨网站追踪用户行为（第三方Cookie）时，它也引发了隐私担忧。因此，现代浏览器提供了强大的Cookie管理功能（查看、删除、阻止特定Cookie），并且全球有相关法规要求提升用户对其使用的透明度与控制权。你可以随时在浏览器设置中查看、管理和删除Cookie。</p><h2 id="CTF入门cookie题目"><a href="#CTF入门cookie题目" class="headerlink" title="CTF入门cookie题目"></a>CTF入门cookie题目</h2><ul><li><p>攻防世界-cookie</p><p> 题目标题“cookie”，猜测指的是浏览器的cookie文件。</p><p>题目描述：X老师告诉小宁他在cookie里放了些东西（那肯定就是flag了），小宁疑惑地想：“这是夹心饼干的意思吗？”</p><p>根据标题和描述得知我们要查看cookie文件。</p><p>进入在线环境：</p><p><img src="https://img2022.cnblogs.com/blog/2768249/202202/2768249-20220225112209429-1715851377.png" alt="img"></p><p>先F12打开开发者工具</p><p><img src="https://img2022.cnblogs.com/blog/2768249/202202/2768249-20220225112346980-1181461429.png" alt="img"></p><p> 找到了一个叫cookie.php的文件，访问</p><p><img src="https://img2022.cnblogs.com/blog/2768249/202202/2768249-20220225112421642-1423130874.png" alt="img"></p><p> See the http response.</p><p>让我们看http响应，猜测flag在响应头里面：</p><p><img src="https://img2022.cnblogs.com/blog/2768249/202202/2768249-20220225112527489-1976574270.png" alt="img"></p><p> over</p></li></ul>]]></content>
       
       
+      <categories>
+          
+          <category> CTF </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Cookie </tag>
+            
+            <tag> HTTP </tag>
+            
+            <tag> Web安全 </tag>
+            
+            <tag> 隐私 </tag>
+            
+            <tag> Web开发 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Web服务器备份文件</title>
+      <link href="/2025/08/04/Web%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%BA%90%E4%BB%A3%E7%A0%81%E5%A4%87%E4%BB%BD%E6%96%87%E4%BB%B6/"/>
+      <url>/2025/08/04/Web%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%BA%90%E4%BB%A3%E7%A0%81%E5%A4%87%E4%BB%BD%E6%96%87%E4%BB%B6/</url>
+      
+        <content type="html"><![CDATA[<h1 id="Web-服务器源代码备份文件"><a href="#Web-服务器源代码备份文件" class="headerlink" title="Web 服务器源代码备份文件"></a><strong>Web 服务器源代码备份文件</strong></h1><ul><li><p>指的是在 Web 应用程序开发、部署、维护过程中产生的，包含当前或历史源代码的文件或数据集合的副本。其主要目的是为了在代码被错误修改、损坏或需要回滚时提供一个恢复点。</p><p><strong>备份文件的主要类型与产生方式：</strong></p><ol><li><strong>开发者手动创建</strong>：<ul><li><strong>常见后缀：</strong> <code>.bak</code>, <code>.backup</code>, <code>.old</code>, <code>.save</code>, <code>~</code>(临时编辑文件) 添加到原始文件名后 (e.g., <code>index.php.bak</code>, <code>config.inc.php.old</code>)。</li><li><strong>行为动机：</strong> 在修改关键文件前习惯性地创建一个“安全网”。</li></ul></li><li><strong>编辑器&#x2F;IDE 自动生成</strong>：<ul><li><strong>交换文件 (Vim)：</strong> <code>.filename.swp</code>, <code>.filename.swo</code>, <code>.filename.swn</code>。在 Vim 编辑文件时自动生成，用于崩溃恢复。如果编辑异常结束，这些文件会残留。</li><li><strong>临时文件&#x2F;备份 (Emacs, 其他编辑器)：</strong> <code>filename~</code>, <code>#filename#</code>。</li><li><strong>操作系统特定 (macOS)：</strong> <code>.DS_Store</code>文件存储文件夹的自定义属性（视图设置、图标位置等），泄露目录结构信息。</li></ul></li><li><strong>压缩归档备份</strong>：<ul><li><strong>形式：</strong> <code>backup.zip</code>, <code>website_20230815.tar.gz</code>, <code>wwwroot.rar</code>。通常包含整个站点目录的副本。</li><li><strong>动机：</strong> 定期手动备份或迁移前打包。</li></ul></li><li><strong>版本控制系统残留</strong>：<ul><li><strong>Git：</strong> <code>.git/</code>目录及其内部文件 (HEAD, index, objects, logs 等)。<strong>这是最危险的泄露之一。</strong></li><li><strong>Subversion (SVN)：</strong> <code>.svn/</code>目录。</li><li><strong>Mercurial (Hg)：</strong> <code>.hg/</code>目录。</li><li><strong>风险：</strong> 不仅泄露当前代码状态，还泄露整个项目历史（包括已“删除”的文件）、所有分支、可能暂存但未提交的更改、提交日志中的敏感信息描述。<code>.git/index</code>文件可能会暴露服务器上存在但不一定在 Web 根目录的文件。</li></ul></li><li><strong>部署&#x2F;迁移遗留</strong>：<ul><li>将本地开发环境的完整目录（包含 <code>.git</code>, <code>.idea</code>, 本地备份文件、测试脚本）直接上传或复制到线上服务器 Web 目录。</li><li>备份脚本运行后未清理临时打包文件或未正确指定备份路径。</li></ul></li></ol><p><strong>为什么备份文件会出现在线上环境？</strong></p><ul><li><strong>疏忽与坏习惯：</strong><ul><li>开发者&#x2F;管理员直接在生产服务器 Web 目录修改文件时创建了备份。</li><li>本地开发环境打包上传时没有清理调试文件、备份文件或版本控制目录。</li><li>部署脚本不严谨，误包含了不应上传的文件。</li><li>忘记删除用于紧急回滚而创建的临时备份。</li></ul></li><li><strong>对风险认识不足：</strong> 低估了源代码和配置文件泄露的潜在危害，认为临时备份文件不会那么容易被发现。</li><li><strong>配置管理混乱：</strong> 缺乏统一的、安全的代码部署和备份流程。</li></ul></li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> CTF </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 备份安全 </tag>
+            
+            <tag> 源码泄露 </tag>
+            
+            <tag> 安全漏洞 </tag>
+            
+            <tag> Git安全 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Robots协议深度解析：爬虫规范与安全实践</title>
+      <link href="/2025/08/04/Robots%E5%8D%8F%E8%AE%AE/"/>
+      <url>/2025/08/04/Robots%E5%8D%8F%E8%AE%AE/</url>
+      
+        <content type="html"><![CDATA[<h1 id="Robots协议"><a href="#Robots协议" class="headerlink" title="Robots协议"></a>Robots协议</h1><p>Robots 协议是网站管理员用来指导网络爬虫（如搜索引擎蜘蛛）如何抓取网站内容的<strong>非强制性约定</strong>，核心通过根目录下的 <code>robots.txt</code> 文件实现。以下是关键知识点解析：</p><hr><h3 id="一、核心作用"><a href="#一、核心作用" class="headerlink" title="一、核心作用"></a><strong>一、核心作用</strong></h3><ol><li><strong>访问控制</strong>：<br> 告知合规爬虫哪些目录或文件​<strong>​禁止抓取​</strong>​（例如后台、日志、测试页面）。</li><li><strong>优化资源</strong>：<br> 避免爬虫浪费带宽抓取无价值页面（如重复内容、图片素材库）。</li><li><strong>聚焦重点</strong>：<br> 引导搜索引擎优先收录重要页面（如使用 <code>Sitemap</code> 指令）。</li></ol><blockquote><p>注意：</p><ul><li><strong>非强制约束</strong>：恶意爬虫可无视该协议。</li><li><strong>不保护敏感数据</strong>：<code>robots.txt</code> 本身公开可读，禁止抓取≠禁止访问。</li></ul></blockquote><hr><h3 id="二、robots-txt-文件规范"><a href="#二、robots-txt-文件规范" class="headerlink" title="二、robots.txt 文件规范"></a><strong>二、<code>robots.txt</code> 文件规范</strong></h3><h4 id="1-基础语法"><a href="#1-基础语法" class="headerlink" title="1. 基础语法"></a><strong>1. 基础语法</strong></h4><ul><li><strong>位置</strong>：必须位于网站根目录（<code>https://example.com/robots.txt</code>）。</li><li><strong>编码</strong>：UTF-8 文本格式。</li><li><strong>指令</strong>（区分大小写）：</li></ul><table><thead><tr><th>指令</th><th>作用</th><th>示例</th></tr></thead><tbody><tr><td><code>User-agent</code></td><td>指定目标爬虫（<code>*</code> 表示所有）</td><td><code>User-agent: Googlebot</code></td></tr><tr><td><code>Disallow</code></td><td>禁止抓取的路径</td><td><code>Disallow: /admin/</code></td></tr><tr><td><code>Allow</code></td><td>例外允许抓取的路径（覆盖Disallow）</td><td><code>Allow: /public/*.html</code></td></tr><tr><td><code>Sitemap</code></td><td>声明XML网站地图地址</td><td><code>Sitemap: https://example.com/sitemap.xml</code></td></tr></tbody></table><h4 id="2-规则优先级"><a href="#2-规则优先级" class="headerlink" title="2. 规则优先级"></a><strong>2. 规则优先级</strong></h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">User-agent: *</span><br><span class="line">Disallow: /images/      # 禁止抓取/images/</span><br><span class="line">Allow: /images/logo.png # 但允许抓取/logo.png（Allow优先级更高）</span><br></pre></td></tr></table></figure><h4 id="3-路径匹配规则"><a href="#3-路径匹配规则" class="headerlink" title="3. 路径匹配规则"></a><strong>3. 路径匹配规则</strong></h4><ul><li><p>支持通配符 *（任意字符）和 $（结束符）：</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Disallow: /*.php$    # 禁止抓取.php结尾文件</span><br><span class="line">Disallow: /tmp/*.log # 禁止抓取/tmp下.log文件</span><br></pre></td></tr></table></figure></li></ul><hr><h3 id="三、常见场景示例"><a href="#三、常见场景示例" class="headerlink" title="三、常见场景示例"></a><strong>三、常见场景示例</strong></h3><h4 id="1-完全开放抓取"><a href="#1-完全开放抓取" class="headerlink" title="1. 完全开放抓取"></a><strong>1. 完全开放抓取</strong></h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">User-agent: *</span><br><span class="line">Disallow:  # 留空表示允许所有</span><br></pre></td></tr></table></figure><h4 id="2-禁止特定爬虫"><a href="#2-禁止特定爬虫" class="headerlink" title="2. 禁止特定爬虫"></a><strong>2. 禁止特定爬虫</strong></h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">User-agent: BadBot   # 屏蔽恶意爬虫&quot;BadBot&quot;</span><br><span class="line">Disallow: /</span><br></pre></td></tr></table></figure><h4 id="3-保护敏感目录"><a href="#3-保护敏感目录" class="headerlink" title="3. 保护敏感目录"></a><strong>3. 保护敏感目录</strong></h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">User-agent: *</span><br><span class="line">Disallow: /backup/    # 数据库备份目录</span><br><span class="line">Disallow: /cgi-bin/   # 脚本目录</span><br><span class="line">Allow: /cgi-bin/public.cgi  # 允许抓取特定脚本</span><br><span class="line">Sitemap: https://example.com/sitemap.xml</span><br></pre></td></tr></table></figure><hr><h3 id="四、CTF与渗透测试中的意义"><a href="#四、CTF与渗透测试中的意义" class="headerlink" title="四、CTF与渗透测试中的意义"></a><strong>四、CTF与渗透测试中的意义</strong></h3><ol><li><strong>信息泄露来源</strong>：<ul><li>暴露后台路径（<code>Disallow: /admin/</code>）</li><li>揭示备份文件目录（<code>Disallow: /backups/</code>）</li><li>泄露API文档路径（<code>Disallow: /swagger/</code>）</li></ul></li><li><strong>攻击面发现</strong>：<br> <code>robots.txt</code> 可能指向隐藏入口点（如 <code>/dev/test_api.php</code>），成为渗透突破口。</li></ol><hr><h3 id="五、开发者注意事项"><a href="#五、开发者注意事项" class="headerlink" title="五、开发者注意事项"></a><strong>五、开发者注意事项</strong></h3><ol><li><p><strong>避免反向指南</strong>：<br> 禁止路径勿包含敏感信息（如 <code>Disallow: /password.txt</code> 暴露文件存在）。</p></li><li><p><strong>访问控制不依赖协议</strong>：<br> 真正敏感内容需用身份验证（如登录页），而非仅靠 <code>robots.txt</code>。</p></li><li><p><strong>兼容性补充</strong>：</p><p>重要页面可添加 </p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;meta name=&quot;robots&quot;&gt;</span><br></pre></td></tr></table></figure><p> 标签双重控制：</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;meta name=&quot;robots&quot; content=&quot;noindex, nofollow&quot;&gt; &lt;!--禁止收录本页--&gt;</span><br></pre></td></tr></table></figure></li></ol><hr><p><strong>总结</strong>：<br> Robots 协议是网站与爬虫之间的“君子协定”，<code>robots.txt</code> 是其核心载体。合理使用可优化SEO，但不具备强制安全性。渗透测试中需警惕其暴露的隐蔽路径，开发者需避免过度依赖该协议保护敏感资源。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> CTF </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Web安全 </tag>
+            
+            <tag> Robots协议 </tag>
+            
+            <tag> 网络爬虫 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>PHP弱类型特性总结</title>
+      <link href="/2025/08/04/PHP%20%E5%BC%B1%E7%B1%BB%E5%9E%8B%E7%89%B9%E6%80%A7/"/>
+      <url>/2025/08/04/PHP%20%E5%BC%B1%E7%B1%BB%E5%9E%8B%E7%89%B9%E6%80%A7/</url>
+      
+        <content type="html"><![CDATA[<h3 id="PHP-弱类型特性总结"><a href="#PHP-弱类型特性总结" class="headerlink" title="PHP 弱类型特性总结"></a>PHP 弱类型特性总结</h3><table><thead><tr><th>表达式</th><th>结果</th><th>原因</th></tr></thead><tbody><tr><td><code>&quot;0e1&quot; == 0</code></td><td>true</td><td>科学计数法转数字&#x3D;0</td></tr><tr><td><code>&quot;0abc&quot; == 0</code></td><td>true</td><td>字符串前缀为数字0</td></tr><tr><td><code>&quot;123abc&quot; &gt; 1</code></td><td>true</td><td>字符串转数字为123</td></tr><tr><td><code>&quot;0&quot; == false</code></td><td>true</td><td>空字符串&#x2F;0在弱类型为假</td></tr><tr><td><code>&quot;0&quot; == null</code></td><td>true</td><td>PHP弱类型自动转换</td></tr></tbody></table><h2 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h2><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">show_source</span>(<span class="keyword">__FILE__</span>);          <span class="comment">// 显示当前文件的源代码</span></span><br><span class="line"><span class="keyword">include</span>(<span class="string">&quot;config.php&quot;</span>);          <span class="comment">// 包含外部配置文件（可能包含 $flag1 和 $flag2）</span></span><br><span class="line"><span class="variable">$a</span> = @<span class="variable">$_GET</span>[<span class="string">&#x27;a&#x27;</span>];               <span class="comment">// 获取 GET 参数 a（@ 抑制错误）</span></span><br><span class="line"><span class="variable">$b</span> = @<span class="variable">$_GET</span>[<span class="string">&#x27;b&#x27;</span>];               <span class="comment">// 获取 GET 参数 b（@ 抑制错误）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 条件1：获取 flag1 的条件</span></span><br><span class="line"><span class="keyword">if</span>(<span class="variable">$a</span> == <span class="number">0</span> <span class="keyword">and</span> <span class="variable">$a</span>) &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="variable">$flag1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 条件2：检查 b 是否为数字</span></span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">is_numeric</span>(<span class="variable">$b</span>)) &#123;</span><br><span class="line">    <span class="keyword">exit</span>();  <span class="comment">// 如果是数字则终止程序</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 条件3：获取 flag2 的条件</span></span><br><span class="line"><span class="keyword">if</span>(<span class="variable">$b</span> &gt; <span class="number">1234</span>) &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="variable">$flag2</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure><h3 id="关键点解析"><a href="#关键点解析" class="headerlink" title="关键点解析"></a>关键点解析</h3><h4 id="1-show-source-FILE"><a href="#1-show-source-FILE" class="headerlink" title="1. show_source(__FILE__)"></a>1. <code>show_source(__FILE__)</code></h4><ul><li><strong>作用</strong>：输出当前文件的源码（即你看到的这段代码）</li><li><strong>目的</strong>：调试或演示用途，帮助理解程序逻辑</li></ul><h4 id="2-include-config-php"><a href="#2-include-config-php" class="headerlink" title="2. include(&quot;config.php&quot;)"></a>2. <code>include(&quot;config.php&quot;)</code></h4><ul><li><p><strong>作用</strong>：引入外部配置文件</p></li><li><p>重要性：配置文件 config.php 中极可能定义了：</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$flag1 = &quot;FLAG&#123;xxx&#125;&quot;;</span><br><span class="line">$flag2 = &quot;FLAG&#123;yyy&#125;&quot;;</span><br></pre></td></tr></table></figure></li><li><p><strong>安全风险</strong>：如果未正确设置目录权限，攻击者可能直接访问 <code>config.php</code> 文件获取 flag</p></li></ul><hr><h3 id="第一个-Flag-获取逻辑"><a href="#第一个-Flag-获取逻辑" class="headerlink" title="第一个 Flag 获取逻辑"></a>第一个 Flag 获取逻辑</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="variable">$a</span> == <span class="number">0</span> <span class="keyword">and</span> <span class="variable">$a</span>) &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="variable">$flag1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h4 id="矛盾条件分析："><a href="#矛盾条件分析：" class="headerlink" title="矛盾条件分析："></a>矛盾条件分析：</h4><ol><li><code>$a == 0</code>：<ul><li>弱类型比较（仅检查值，不检查类型）</li><li>这些值均满足：<ul><li><code>0</code>（整型）</li><li><code>&quot;0&quot;</code>（字符串）</li><li><code>&quot;abc&quot;</code>（非空字符串转数字为0）</li><li><code>false</code>（布尔值）</li></ul></li></ul></li><li><code>$a</code>（作为布尔值）：<ul><li>要求值为 <code>true</code></li><li>这些值被PHP视为假（false）：<ul><li><code>0</code>（整型）</li><li><code>&quot;0&quot;</code>（字符串）</li><li><code>&quot;&quot;</code>（空字符串）</li><li><code>false</code></li></ul></li></ul></li></ol><h4 id="破解方案："><a href="#破解方案：" class="headerlink" title="破解方案："></a>破解方案：</h4><p>需同时满足：</p><ul><li><strong>弱类型等于0</strong></li><li><strong>布尔值为真</strong></li></ul><p><strong>有效 payload</strong>：</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">a=0e1     // 科学计数法：0×10^1 = 0（弱类型）</span><br><span class="line">a=0abc    // 字符串转数字为0</span><br><span class="line">a=0.0     // 浮点数0</span><br></pre></td></tr></table></figure><p><strong>原理</strong>：非空字符串在布尔判断中为真，但在弱类型比较中等于0。</p><hr><h3 id="第二个-Flag-获取逻辑"><a href="#第二个-Flag-获取逻辑" class="headerlink" title="第二个 Flag 获取逻辑"></a>第二个 Flag 获取逻辑</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if(is_numeric($b)) exit();   // 如果b是数字则退出</span><br><span class="line">if($b &gt; 1234) echo $flag2;   // 要求b&gt;1234</span><br></pre></td></tr></table></figure><h4 id="矛盾条件分析：-1"><a href="#矛盾条件分析：-1" class="headerlink" title="矛盾条件分析："></a>矛盾条件分析：</h4><ol><li><code>is_numeric($b)</code> 为假：<ul><li>要求 <code>$b</code> 不能是数字或数字字符串</li><li>有效值：<code>&quot;1234abc&quot;</code>，<code>&quot;abc&quot;</code>，<code>&quot;12e4&quot;</code>（PHP 8.0前）</li></ul></li><li><code>$b &gt; 1234</code> 为真：<ul><li>需要数值大于1234</li><li>问题：非数字字符串会转为0（0 &lt; 1234）</li></ul></li></ol><h4 id="破解方案：-1"><a href="#破解方案：-1" class="headerlink" title="破解方案："></a>破解方案：</h4><p>需使：</p><ul><li><code>is_numeric()</code> 返回 <code>false</code></li><li>但在数值比较时大于1234</li></ul><p> <strong>有效 payload</strong>：</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">b=1235abc    // 非数字字符串（is_numeric=false）</span><br><span class="line">             // 比较时强制转数字为1235 &gt; 1234</span><br><span class="line"></span><br><span class="line">b=9999e1     // PHP&lt;8.0：&quot;9999e1&quot; 科学计数法（is_numeric=false）</span><br><span class="line">             // 比较时转数字为99990 &gt; 1234</span><br></pre></td></tr></table></figure><hr><h3 id="完整攻击方案"><a href="#完整攻击方案" class="headerlink" title="完整攻击方案"></a>完整攻击方案</h3><h4 id="同时获取两个-FLAG："><a href="#同时获取两个-FLAG：" class="headerlink" title="同时获取两个 FLAG："></a>同时获取两个 FLAG：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">URL: /path/to/file.php?a=0e1&amp;b=1235abc</span><br></pre></td></tr></table></figure><h4 id="响应结果："><a href="#响应结果：" class="headerlink" title="响应结果："></a>响应结果：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">FLAG1&#123;this_is_flag1&#125;  &lt;!-- 来自条件1 --&gt;</span><br><span class="line">FLAG2&#123;this_is_flag2&#125;  &lt;!-- 来自条件3 --&gt;</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> CTF </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> PHP </tag>
+            
+            <tag> 弱类型 </tag>
+            
+            <tag> 安全 </tag>
+            
+        </tags>
       
     </entry>
     
