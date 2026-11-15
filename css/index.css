@@ -3266,26 +3266,38 @@ figure.highlight pre .javascript .function {
   display: block;
 }
 #footer {
+  --footer-ink: #172032;
+  --footer-wash: rgba(250,244,242,0.66);
   position: relative;
-  background-color: #49b1f5;
+  background-color: #eadddf;
   background-attachment: scroll;
-  background-position: bottom;
+  background-position: center 65%;
   background-size: cover;
+}
+[data-theme='dark'] #footer {
+  --footer-ink: #f7f2f4;
+  --footer-wash: rgba(15,21,35,0.69);
+  background-color: #293348;
+}
+#footer:before {
+  position: absolute;
+  inset: 0;
+  background-color: var(--footer-wash);
+  content: '';
 }
 #footer > * {
   position: relative;
-  color: var(--light-grey);
+  color: var(--footer-ink);
 }
 #footer a {
-  color: var(--light-grey);
-  -webkit-transition: all 0.3s ease-in-out;
-  -moz-transition: all 0.3s ease-in-out;
-  -o-transition: all 0.3s ease-in-out;
-  -ms-transition: all 0.3s ease-in-out;
-  transition: all 0.3s ease-in-out;
+  color: inherit;
 }
 #footer a:hover {
-  color: #49b1f5;
+  text-decoration: underline;
+}
+#footer a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
 }
 #footer .footer-separator {
   margin: 0 4px;
@@ -3356,12 +3368,39 @@ figure.highlight pre .javascript .function {
   white-space: nowrap;
 }
 #footer .footer-other {
-  padding: 40px 20px;
+  padding: clamp(30px, 3.6vw, 54px) 20px;
   width: 100%;
+  line-height: 1.65;
   text-align: center;
 }
 #footer .footer-other .framework-info {
+  font-size: 0.9em;
+}
+#footer .footer-other .framework-info {
   display: block;
+}
+#footer .footer-study-links {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  -webkit-box-lines: multiple;
+  -moz-box-lines: multiple;
+  -o-box-lines: multiple;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-box-pack: center;
+  -moz-box-pack: center;
+  -o-box-pack: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 6px 18px;
+  margin-bottom: 10px;
+  font-weight: 600;
 }
 #page-header {
   position: relative;
