@@ -165,6 +165,15 @@
 <p>这次先用 uv 配好依赖、验证 PyTRIO 和 SwanLab，再在 GSM8K 上跑了 10 步 GRPO，确认训练、指标记录和 LoRA 权重导出都能走通。正文还整理了读训练代码时用到的概念，包括重要性采样、PPO&#x2F;CISPO、LoRA、OPD 和 Observation Mask。</p>
 <span id="more"></span>
 
+<style id="task01-formula-spacing">
+#article-container:has(> #task01-formula-spacing) > p:has(+ mjx-container[display="true"]) {
+  margin-bottom: 8px;
+}
+#article-container:has(> #task01-formula-spacing) > mjx-container[display="true"] {
+  margin-block: 8px;
+}
+</style>
+
 <h2 id="工具与环境"><a href="#工具与环境" class="headerlink" title="工具与环境"></a>工具与环境</h2><ul>
 <li><strong>PyTRIO</strong>：普通云服务器是租卡自己配环境，PyTRIO 则是把大模型训练能力封装成了 API。不用折腾复杂的集群分布式和 GPU 管理，直接调接口跑训练，门槛和成本低很多。</li>
 <li><strong>SwanLab</strong>：用来记录和可视化训练过程中的 loss、reward、kl 等指标。</li>
