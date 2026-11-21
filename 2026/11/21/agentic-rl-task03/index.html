@@ -1,0 +1,398 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Datawhale Agentic RL Lab Task03 学习笔记：Vision GRPO 与 GeoQA 实战 | Bubble's Blogs</title><meta name="author" content="Bubble"><meta name="copyright" content="Bubble"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="这篇是 Datawhale Agentic RL Lab 组队学习的第三篇笔记，对应官方原文 Vision GRPO：GeoQA 图文推理实战。 这次我把图文输入接进 GRPO，用较小的配置跑了 20 步，并在同一批 GeoQA 测试题上比较 Base、Step 10 和 Step 20。除了弄清图像 token 怎么对齐，我还逐题检查了分数上涨到底来自哪里。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Datawhale Agentic RL Lab Task03 学习笔记：Vision GRPO 与 GeoQA 实战">
+<meta property="og:url" content="https://bubble-xd.github.io/2026/11/21/agentic-rl-task03/index.html">
+<meta property="og:site_name" content="Bubble&#39;s Blogs">
+<meta property="og:description" content="这篇是 Datawhale Agentic RL Lab 组队学习的第三篇笔记，对应官方原文 Vision GRPO：GeoQA 图文推理实战。 这次我把图文输入接进 GRPO，用较小的配置跑了 20 步，并在同一批 GeoQA 测试题上比较 Base、Step 10 和 Step 20。除了弄清图像 token 怎么对齐，我还逐题检查了分数上涨到底来自哪里。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://bubble-xd.github.io/image/%E5%A4%B4%E5%83%8F.jpg">
+<meta property="article:published_time" content="2026-11-21T10:06:00.000Z">
+<meta property="article:modified_time" content="2026-11-21T10:08:56.906Z">
+<meta property="article:author" content="Bubble">
+<meta property="article:tag" content="Agentic RL">
+<meta property="article:tag" content="Datawhale">
+<meta property="article:tag" content="GRPO">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bubble-xd.github.io/image/%E5%A4%B4%E5%83%8F.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Datawhale Agentic RL Lab Task03 学习笔记：Vision GRPO 与 GeoQA 实战",
+  "url": "https://bubble-xd.github.io/2026/11/21/agentic-rl-task03/",
+  "image": "https://bubble-xd.github.io/image/%E5%A4%B4%E5%83%8F.jpg",
+  "datePublished": "2026-11-21T10:06:00.000Z",
+  "dateModified": "2026-11-21T10:08:56.906Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Bubble",
+      "url": "https://bubble-xd.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/image/ico.jpg"><link rel="canonical" href="https://bubble-xd.github.io/2026/11/21/agentic-rl-task03/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+
+
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+
+
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+
+
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Datawhale Agentic RL Lab Task03 学习笔记：Vision GRPO 与 GeoQA 实战',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/image/%E8%83%8C%E6%99%AF.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">Bubble's Blogs</span></a><a class="nav-page-title" href="/"><span class="site-name">Datawhale Agentic RL Lab Task03 学习笔记：Vision GRPO 与 GeoQA 实战</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Datawhale Agentic RL Lab Task03 学习笔记：Vision GRPO 与 GeoQA 实战</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-21T10:06:00.000Z" title="发表于 2026-11-21 18:06:00">2026-11-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-21T10:08:56.906Z" title="更新于 2026-11-21 18:08:56">2026-11-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/LLM/">LLM</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.4k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>9分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>这篇是 Datawhale Agentic RL Lab 组队学习的第三篇笔记，对应官方原文 <a target="_blank" rel="noopener" href="https://datawhalechina.github.io/agentic-rl-lab/experiments/vision-grpo/">Vision GRPO：GeoQA 图文推理实战</a>。</p>
+<p>这次我把图文输入接进 GRPO，用较小的配置跑了 20 步，并在同一批 GeoQA 测试题上比较 Base、Step 10 和 Step 20。除了弄清图像 token 怎么对齐，我还逐题检查了分数上涨到底来自哪里。</p>
+<span id="more"></span>
+
+<h2 id="Vision-GRPO"><a href="#Vision-GRPO" class="headerlink" title="Vision GRPO"></a>Vision GRPO</h2><p>把整条 RL 链路推到多模态：模型先看一张几何图，再读取题目和四个选项，同一道题并发生成一组回答，最后靠可验证的选项奖励完成在线更新。使用的数据集是 GeoQA：中文几何问答数据集，每条样本都包含几何图片、题目、四个候选项、正确选项标签，以及数据集自带的解析等字段。共 5010 条，这次复现使用固定超参数，没有用原始 dev 集调参。</p>
+<table>
+<thead>
+<tr>
+<th>原始 split</th>
+<th>数量</th>
+<th>本章用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>train</td>
+<td>3,503</td>
+<td>全部用于训练</td>
+</tr>
+<tr>
+<td>test</td>
+<td>759</td>
+<td>固定抽取 100 条用于评测</td>
+</tr>
+<tr>
+<td>dev</td>
+<td>748</td>
+<td>本次实验不使用</td>
+</tr>
+</tbody></table>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/agentic-rl-task03/geoqa-dataset.png" alt="GeoQA 图文样本与数据集字段"></p>
+<p><strong>Parquet</strong>（全称 <strong>Apache Parquet</strong>）是一种开源的<strong>列式存储（Columnar Storage）二进制文件格式</strong>，最初源自大数据生态，现在几乎是 Hugging Face 和大模型数据集的标配存储格式。<br>模型看到的只有图片、题目和选项，训练 reward 使用 label 生成正确选项（计算奖励分数），<code>answer</code> 中的原始解析不会作为监督文本送给模型，<strong>模型在训练时完全看不到 <code>answer</code> 里的标准解题过程</strong> 不去模仿 or 背诵<br>训练方式采用 LoRA, rank 32<br><code>Qwen/Qwen3.5-4B</code> 有 40 亿参数，直接修改所有参数（全量微调）开销较大。<strong>LoRA（Low-Rank Adaptation，低秩自适应）</strong> 的思路是：</p>
+<ul>
+<li><strong>冻结</strong>原模型庞大的权重矩阵 𝑊（比如大小是 𝑑 ×𝑘）不动；</li>
+<li>在旁边外挂两个很窄的小矩阵 𝐴（大小 𝑟 ×𝑘）和 𝐵（大小 𝑑 ×𝑟），只训练 𝐴 和 𝐵，用它们的乘积 𝐵 ×𝐴 来表达权重的更新量 Δ𝑊：  <script type="math/tex">W_{\mathrm{eff}} = W_0 + \frac{\alpha}{r}BA</script>，其中系数由 LoRA 配置决定。</li>
+<li>这里的中间维度 <strong>𝑟 就叫 <code>rank</code>（秩）</strong>。<code>rank 32</code> 就是把 𝑟 设为 32。<br>其实本质就是 A 矩阵降维，B 矩阵升维（从右往左计算）<br><strong>举个直观例子</strong>（假设原矩阵是 4096 ×4096）：</li>
+<li>原矩阵参数量：4096 ×4096 ≈1677 万</li>
+<li><code>rank 32</code> 的 LoRA 参数量：(32 ×4096) +(4096 ×32) ≈26 万（<strong>只有原矩阵的 ~1.56%</strong>）</li>
+</ul>
+<hr>
+<p>Vision GRPO 和纯文本 GRPO 差异最大的地方：<br>在 train.py 中的 build_prompt_chunks 中先使用模型自己的 chat template 格式化消息，然后 image 内容放入占位符</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">format_question</span>(<span class="params">subject: <span class="built_in">str</span>, choices: <span class="built_in">list</span>[<span class="built_in">str</span>]</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;将题目和四个选项整理成模型指令。&quot;&quot;&quot;</span></span><br><span class="line">    choice_lines = <span class="string">&quot;\n&quot;</span>.join(</span><br><span class="line">        <span class="string">f&quot;<span class="subst">&#123;letter&#125;</span>. <span class="subst">&#123;choice&#125;</span>&quot;</span></span><br><span class="line">        <span class="keyword">for</span> letter, choice <span class="keyword">in</span> <span class="built_in">zip</span>(CHOICE_LETTERS, choices, strict=<span class="literal">True</span>)</span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        <span class="string">&quot;请根据图片解答下面的几何选择题。\n&quot;</span></span><br><span class="line">        <span class="string">f&quot;题目：<span class="subst">&#123;subject.strip()&#125;</span>\n&quot;</span></span><br><span class="line">        <span class="string">f&quot;选项：\n<span class="subst">&#123;choice_lines&#125;</span>\n&quot;</span></span><br><span class="line">        <span class="string">&quot;请先进行简单逻辑推理思考，再给出最终答案。&quot;</span></span><br><span class="line">        <span class="string">&quot;最终选项格式必须是 \\boxed&#123;A&#125;、\\boxed&#123;B&#125;、\\boxed&#123;C&#125; 或 \\boxed&#123;D&#125;。&quot;</span></span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+<p>渲染后的 prompt 会沿 <code>&lt;|image_pad|&gt;</code> 拆成三个 chunk：EncodedTextChunk + ImageChunk + EncodedTextChunk<br>整体流程如下。同题采样数由 <code>group-size</code> 决定，教程配置是 8，本次是 4。</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">GeoQA 图文题目 -&gt; 当前 LoRA 权重生成 sampler -&gt; 同题并发采样一组 completion -&gt; 解析最后一个 \boxed&#123;A-D&#125; -&gt; 规则 reward：正确为 1，其余为 0 -&gt; 组内计算 relative advantage -&gt; 构造多模态 Datum 并更新 LoRA</span><br></pre></td></tr></table></figure>
+<p>这里只有成功解析出最后一个 <code>\boxed&#123;A-D&#125;</code> 且与标签一致时 <code>reward = 1</code>，答错或格式不对（包括超长截断没输出选项）<code>reward = 0</code>。整体强化学习流程和纯文本 GRPO 基本一致，主要差异在于多模态输入与对齐处理：除了把图片合成白底并编码成 <code>ImageChunk</code> 塞进 prompt 外，还必须用 <code>image_processor</code> 算出视觉 token 数并校验本地与远端 <code>input_tokens</code> 一致，这样构造 <code>Datum</code> 时才能用 <code>0</code> 精确占位整个图文 prompt 区间，让策略梯度只作用于模型生成的文本 completion。<br>然后开始把图文题目和模型回答拼成一条 Datum，同时告诉训练框架哪里只是上下文，哪里才真正计算梯度更新</p>
+<p>因为大模型是<strong>自回归预测下一个 token（Next-Token Prediction）</strong>：输入第 𝑖 个位置，预测的是第 𝑖 +1 个位置的 token。举个例子：假设图文 <code>prompt</code> 总长是 <strong>10</strong>（含文本 + 图片视觉 token），模型生成的回答 <code>sample.tokens</code> 是 <code>[t0, t1, t2, t3]</code>（长 <strong>4</strong>）：</p>
+<ul>
+<li><code>model_input</code> 放入：完整 <code>prompt</code>（10） + <code>sample.tokens[:-1]</code>（<code>[t0, t1, t2]</code>，3）&#x3D; <strong>总长 13</strong></li>
+<li><code>observation_length</code> &#x3D; <code>10 - 1</code> &#x3D; <strong>9</strong></li>
+<li><code>target_tokens</code> 放入：9 个 <code>0</code> + 完整 <code>sample.tokens</code>（4）&#x3D; <strong>总长 13</strong><br>把它们上下对齐一下，就能看懂为什么要 <code>-1</code>：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>下标位置</th>
+<th>0 ~ 8 (共 9 个)</th>
+<th>9 (<strong>prompt 最后一个</strong>)</th>
+<th>10</th>
+<th>11</th>
+<th>12</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>model_input</code></strong></td>
+<td>prompt 前 9 个 token</td>
+<td>prompt 第 10 个 token</td>
+<td><code>t0</code></td>
+<td><code>t1</code></td>
+<td><code>t2</code></td>
+</tr>
+<tr>
+<td><strong><code>target_tokens</code></strong></td>
+<td><code>0</code>（不计算）</td>
+<td><strong><code>t0</code></strong></td>
+<td><strong><code>t1</code></strong></td>
+<td><strong><code>t2</code></strong></td>
+<td><strong><code>t3</code></strong></td>
+</tr>
+<tr>
+<td><strong><code>logprobs</code></strong></td>
+<td><code>0.0</code></td>
+<td><code>lp(t0)</code></td>
+<td><code>lp(t1)</code></td>
+<td><code>lp(t2)</code></td>
+<td><code>lp(t3)</code></td>
+</tr>
+<tr>
+<td><strong><code>advantages</code></strong></td>
+<td><code>0.0</code></td>
+<td><code>A</code></td>
+<td><code>A</code></td>
+<td><code>A</code></td>
+<td><code>A</code></td>
+</tr>
+<tr>
+<td>可以看到：</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<ol>
+<li><code>prompt</code> 最后一个 token 负责预测回答的第一个字 <code>t0</code> ，所以 <code>target_tokens</code> 从下标 <code>9</code>（也就是 <code>prompt_length - 1</code>）开始接上 <code>t0</code>；</li>
+<li>最后一个字 <code>t3</code> 后面已经没有要预测的内容了，所以 <code>model_input</code> 只需要输入到 <code>t2</code>（即 <code>sample.tokens[:-1]</code>），最终两边总长度刚好都是 <code>13</code></li>
+</ol>
+<h3 id="启动训练"><a href="#启动训练" class="headerlink" title="启动训练"></a>启动训练</h3><p>为了节省费用，这里先跑一个 20-step 的小规模训练（同时将 <code>batch-size</code> 和 <code>group-size</code> 设为 <code>4*4</code>）：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">uv run python experiments/vision-grpo/train.py --base-model Qwen/Qwen3.5-4B --lora-rank 32 --steps 20 --batch-size 4 --group-size 4 --max-tokens 1024 --temperature 1.0 --top-p 1.0 --learning-rate 4e-5 --save-every 10 --swanlab-mode online</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>踩坑记录</strong>：如果直接按原教程设 <code>--batch-size 8 --group-size 8</code>，1 个 step 最多会生成 64 条图文 <code>Datum</code>（每条都带 1 张图片），我在当前 PyTRIO 环境下遇到远端 Trainer 拒收并报错 <code>InputRejected: batch exceeds image count limit</code>。调小到 <code>4×4</code> 后顺利跑通，每步最多 16 张图。若想保留每题的采样数，可以先减小每步的题目数。</p>
+</blockquote>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/agentic-rl-task03/reward-and-format.png" alt="SwanLab 中的奖励、格式率、退化组比例和有效样本数"></p>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/agentic-rl-task03/length-and-loss.png" alt="SwanLab 中的生成 token 数和训练损失"></p>
+<h3 id="评测-Base-和-checkpoint"><a href="#评测-Base-和-checkpoint" class="headerlink" title="评测 Base 和 checkpoint"></a>评测 Base 和 checkpoint</h3><h4 id="为什么训练时已有-reward，还要单独做评测？"><a href="#为什么训练时已有-reward，还要单独做评测？" class="headerlink" title="为什么训练时已有 reward，还要单独做评测？"></a>为什么训练时已有 <code>reward</code>，还要单独做评测？</h4><ol>
+<li><strong>Base</strong>：未经本次 RL 训练的原始模型（这里是 <code>Qwen/Qwen3.5-4B</code>），用来建立Baseline。</li>
+<li><strong>Checkpoint</strong>：训练途中或结束时保存的权重快照。在 train.py 中每次保存会生成两种路径，<strong>评测只用第一种</strong>：<ul>
+<li><code>sampler_weights</code>（<code>trio://.../sampler_weights/...-sampler</code>）：仅含推理所需权重，专门拿来做推理和评测；</li>
+<li><code>training_state</code>（<code>trio://.../training_state/...-state</code>）：还包含优化器状态，专门用于断点续训。</li>
+</ul>
+</li>
+<li><strong>为什么不能只看训练日志里的 <code>reward</code> 曲线？</strong> <ul>
+<li>训练时每个 step 拿的是不同的训练题（难度有波动），且采样开了随机性（<code>temperature=1.0</code>）；</li>
+<li>评测必须把 Base 和 Checkpoint 放到<strong>同一批未参与训练的测试题</strong>上，其实就是控制变量法。<br>然后<strong>① 评测 Base（原版 Qwen 3.5-4 B）：</strong></li>
+</ul>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">uv run python experiments/vision-grpo/eval.py --output experiments/vision-grpo/eval-results-base.json</span><br></pre></td></tr></table></figure>
+
+<p><strong>② 评测训练后的 Step-10 Checkpoint：</strong><br>训练每 10 步保存一次。评测时把示例中的权重路径替换为自己的 sampler 路径。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">uv run python experiments/vision-grpo/eval.py --model-path <span class="string">&quot;trio://&lt;你的运行 ID&gt;/sampler_weights/vision-grpo-qwen35-4b-geoqa-step-10-sampler&quot;</span> --output experiments/vision-grpo/eval-results-step-10.json</span><br></pre></td></tr></table></figure>
+
+<p><strong>③ 评测训练后的 Step-20 Checkpoint：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">uv run python experiments/vision-grpo/eval.py --model-path <span class="string">&quot;trio://&lt;你的运行 ID&gt;/sampler_weights/vision-grpo-qwen35-4b-geoqa-step-20-sampler&quot;</span> --output experiments/vision-grpo/eval-results-step-20.json</span><br></pre></td></tr></table></figure>
+
+<h3 id="实验结果与个人理解"><a href="#实验结果与个人理解" class="headerlink" title="实验结果与个人理解"></a>实验结果与个人理解</h3><p>本次为了规避单批图片数上限，采用 <code>4×4</code> 配置（<code>batch-size=4, group-size=4</code>）跑了 20 steps。在固定 100 题测试集上，Base、Step 10 与 Step 20 的对比结果如下：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th align="right">Accuracy</th>
+<th align="right">Format rate</th>
+<th align="right">条件准确率（格式正确时）</th>
+<th align="right">平均输出长度</th>
+<th align="right">评测耗时</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Base</strong> (<code>Qwen3.5-4B</code>)</td>
+<td align="right">68.0%</td>
+<td align="right">70.0%</td>
+<td align="right">97.1% (68&#x2F;70)</td>
+<td align="right">930.0 字</td>
+<td align="right">50.41s</td>
+</tr>
+<tr>
+<td><strong>Step 10</strong></td>
+<td align="right">77.0% (+9.0 pp)</td>
+<td align="right">80.0% (+10.0 pp)</td>
+<td align="right">96.3% (77&#x2F;80)</td>
+<td align="right">828.1 字</td>
+<td align="right">83.09s</td>
+</tr>
+<tr>
+<td><strong>Step 20</strong></td>
+<td align="right"><strong>80.0% (+12.0 pp)</strong></td>
+<td align="right"><strong>82.0% (+12.0 pp)</strong></td>
+<td align="right"><strong>97.6% (80&#x2F;82)</strong></td>
+<td align="right"><strong>777.8 字</strong></td>
+<td align="right">71.82s</td>
+</tr>
+</tbody></table>
+<p><strong>我的实验观察</strong></p>
+<ol>
+<li><strong>判对率的提升主要来自原先无法解析的题。</strong> 相同的 100 道题中，Base 有 68 道判对，Step 20 有 80 道。按题目 ID 对齐后发现，14 道题从无法解析变为判对，2 道题从判对变成无法解析；两次都能解析的 68 道题中，66 道都是对的，另外 2 道都是错的。平均输出从约 930 字缩短到 778 字。可以说模型更常在当前评测规则下给出可判分的正确答案，但还不能断定它更会做几何题，也不能只凭平均长度判断哪条回答被截断。</li>
+<li><strong>缩小每题的采样组也会改变训练。</strong> 同一题的采样如果拿到相同奖励，组内优势全为零。本次 20 个训练步中只有 13 步执行了有效更新。碰到图片预算时，减小每步题数和减小每题采样数并不等价：前者减少题目覆盖，后者减少同一题里获得不同奖励的机会。</li>
+<li><strong>这次耗时只作记录。</strong> 三次都是在远端运行，总耗时同时包含排队、初始化和生成等因素。没有做重复计时或拆分这些环节，不能用一次运行比较 Base 和 checkpoint 的推理速度。</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://bubble-xd.github.io">Bubble</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://bubble-xd.github.io/2026/11/21/agentic-rl-task03/">https://bubble-xd.github.io/2026/11/21/agentic-rl-task03/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://bubble-xd.github.io" target="_blank">Bubble's Blogs</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Agentic-RL/">Agentic RL</a><a class="post-meta__tags" href="/tags/Datawhale/">Datawhale</a><a class="post-meta__tags" href="/tags/GRPO/">GRPO</a></div><div class="post-share"><div class="social-share" data-image="/image/%E5%A4%B4%E5%83%8F.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination" aria-label="上一篇 / 下一篇"><a class="pagination-related" href="/2026/11/20/agentic-rl-task02/" rel="next"><span class="post-card-text"><span class="post-card-meta"><span aria-hidden="true">→</span>下一篇</span><span class="post-card-title">Datawhale Agentic RL Lab Task02 学习笔记：损失函数与 GRPO 实战</span></span></a></nav><section class="relatedPosts" aria-labelledby="related-posts-heading"><h2 class="headline" id="related-posts-heading">相关推荐</h2><div class="relatedPosts-list"><a class="pagination-related" href="/2026/11/17/agentic-rl-task01/"><span class="post-card-text"><span class="post-card-meta">2026-11-17</span><span class="post-card-title">Datawhale Agentic RL Lab Task01 学习笔记：环境配置与第一次 GRPO 训练</span></span><span class="post-card-arrow" aria-hidden="true">↗</span></a><a class="pagination-related" href="/2026/11/20/agentic-rl-task02/"><span class="post-card-text"><span class="post-card-meta">2026-11-20</span><span class="post-card-title">Datawhale Agentic RL Lab Task02 学习笔记：损失函数与 GRPO 实战</span></span><span class="post-card-arrow" aria-hidden="true">↗</span></a></div></section></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Bubble</div><div class="author-info-description">Seek the light to meet,walk in its glow</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/bubble-xd"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">你若盛开，蝴蝶自来</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vision-GRPO"><span class="toc-number">1.</span> <span class="toc-text">Vision GRPO</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E8%AE%AD%E7%BB%83"><span class="toc-number">1.1.</span> <span class="toc-text">启动训练</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%84%E6%B5%8B-Base-%E5%92%8C-checkpoint"><span class="toc-number">1.2.</span> <span class="toc-text">评测 Base 和 checkpoint</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AE%AD%E7%BB%83%E6%97%B6%E5%B7%B2%E6%9C%89-reward%EF%BC%8C%E8%BF%98%E8%A6%81%E5%8D%95%E7%8B%AC%E5%81%9A%E8%AF%84%E6%B5%8B%EF%BC%9F"><span class="toc-number">1.2.1.</span> <span class="toc-text">为什么训练时已有 reward，还要单独做评测？</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C%E4%B8%8E%E4%B8%AA%E4%BA%BA%E7%90%86%E8%A7%A3"><span class="toc-number">1.3.</span> <span class="toc-text">实验结果与个人理解</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/21/agentic-rl-task03/" title="Datawhale Agentic RL Lab Task03 学习笔记：Vision GRPO 与 GeoQA 实战">Datawhale Agentic RL Lab Task03 学习笔记：Vision GRPO 与 GeoQA 实战</a><time datetime="2026-11-21T10:06:00.000Z" title="发表于 2026-11-21 18:06:00">2026-11-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/20/agentic-rl-task02/" title="Datawhale Agentic RL Lab Task02 学习笔记：损失函数与 GRPO 实战">Datawhale Agentic RL Lab Task02 学习笔记：损失函数与 GRPO 实战</a><time datetime="2026-11-20T13:38:00.000Z" title="发表于 2026-11-20 21:38:00">2026-11-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/18/happy-llm-task01/" title="Happy-LLM Task01 学习笔记：NLP 基础概念">Happy-LLM Task01 学习笔记：NLP 基础概念</a><time datetime="2026-11-17T16:00:00.000Z" title="发表于 2026-11-18 00:00:00">2026-11-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/17/agentic-rl-task01/" title="Datawhale Agentic RL Lab Task01 学习笔记：环境配置与第一次 GRPO 训练">Datawhale Agentic RL Lab Task01 学习笔记：环境配置与第一次 GRPO 训练</a><time datetime="2026-11-17T15:00:00.000Z" title="发表于 2026-11-17 23:00:00">2026-11-17</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/04/Cookie/" title="Cookie基础知识">Cookie基础知识</a><time datetime="2025-08-03T16:00:00.000Z" title="发表于 2025-08-04 00:00:00">2025-08-04</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(/image/%E8%83%8C%E6%99%AF.jpg);"><div class="footer-other"><nav class="footer-study-links" aria-label="学习笔记"><a href="/tags/Happy-LLM/">Happy-LLM</a></nav><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Bubble</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z\d\-\.\+]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(t.test(e.href)||r.test(e.href))&&(e.href=a.dataset.original)})});</script><script>(r=>{r.imageLazyLoadSetting.processImages=t;var a=r.imageLazyLoadSetting.isSPA,o=r.imageLazyLoadSetting.preloadRatio||1,d=i();function i(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(t){(a||t)&&(d=i());for(var e,n=0;n<d.length;n++)0<=(e=(e=d[n]).getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(r.innerHeight*o||document.documentElement.clientHeight*o)&&(()=>{var t,e,a,o,i=d[n];e=function(){d=d.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).dataset.loaded||(t.hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(a=new Image,o=t.getAttribute("data-original"),a.onload=function(){t.src=o,t.removeAttribute("data-original"),t.setAttribute("data-loaded",!0),e&&e()},a.onerror=function(){t.removeAttribute("data-original"),t.setAttribute("data-loaded",!1),t.src=o},t.src!==o&&(a.src=o)))})()}function e(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",e),r.addEventListener("resize",e),r.addEventListener("orientationchange",e)})(this);</script></body></html>
