@@ -1,0 +1,353 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Datawhale Agentic RL Lab 学习笔记：PyTrio-Jev 决策模型实战 | Bubble's Blogs</title><meta name="author" content="Bubble"><meta name="copyright" content="Bubble"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="这篇笔记记录学习 Datawhale Agentic RL Lab 中 PyTrio-Jev 实验的过程，对应官方教程 PyTrio-Jev：一顿麦当劳早餐，人人皆可训练自己的 Jev 决策模型。 本次围绕类型化决策模型的核心设计（共享 state 一次前向、marker 单 token 定位、稀疏位置监督），完成了 2160 条数据的 LoRA 微调、受限 Softmax 推理以及基于温度缩放的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Datawhale Agentic RL Lab 学习笔记：PyTrio-Jev 决策模型实战">
+<meta property="og:url" content="https://bubble-xd.github.io/2026/11/24/agentic-rl-pytrio-jev/index.html">
+<meta property="og:site_name" content="Bubble&#39;s Blogs">
+<meta property="og:description" content="这篇笔记记录学习 Datawhale Agentic RL Lab 中 PyTrio-Jev 实验的过程，对应官方教程 PyTrio-Jev：一顿麦当劳早餐，人人皆可训练自己的 Jev 决策模型。 本次围绕类型化决策模型的核心设计（共享 state 一次前向、marker 单 token 定位、稀疏位置监督），完成了 2160 条数据的 LoRA 微调、受限 Softmax 推理以及基于温度缩放的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://bubble-xd.github.io/image/%E5%A4%B4%E5%83%8F.jpg">
+<meta property="article:published_time" content="2026-11-24T09:52:00.000Z">
+<meta property="article:modified_time" content="2026-11-24T09:55:45.804Z">
+<meta property="article:author" content="Bubble">
+<meta property="article:tag" content="Agentic RL">
+<meta property="article:tag" content="Datawhale">
+<meta property="article:tag" content="PyTrio-Jev">
+<meta property="article:tag" content="SFT">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bubble-xd.github.io/image/%E5%A4%B4%E5%83%8F.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Datawhale Agentic RL Lab 学习笔记：PyTrio-Jev 决策模型实战",
+  "url": "https://bubble-xd.github.io/2026/11/24/agentic-rl-pytrio-jev/",
+  "image": "https://bubble-xd.github.io/image/%E5%A4%B4%E5%83%8F.jpg",
+  "datePublished": "2026-11-24T09:52:00.000Z",
+  "dateModified": "2026-11-24T09:55:45.804Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Bubble",
+      "url": "https://bubble-xd.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/image/ico.jpg"><link rel="canonical" href="https://bubble-xd.github.io/2026/11/24/agentic-rl-pytrio-jev/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Datawhale Agentic RL Lab 学习笔记：PyTrio-Jev 决策模型实战',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">10</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">23</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/image/%E8%83%8C%E6%99%AF.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">Bubble's Blogs</span></a><a class="nav-page-title" href="/"><span class="site-name">Datawhale Agentic RL Lab 学习笔记：PyTrio-Jev 决策模型实战</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Datawhale Agentic RL Lab 学习笔记：PyTrio-Jev 决策模型实战</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-24T09:52:00.000Z" title="发表于 2026-11-24 17:52:00">2026-11-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-24T09:55:45.804Z" title="更新于 2026-11-24 17:55:45">2026-11-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/LLM/">LLM</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/LLM/Agentic-RL/">Agentic RL</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>这篇笔记记录学习 <strong>Datawhale Agentic RL Lab</strong> 中 PyTrio-Jev 实验的过程，对应官方教程 <a target="_blank" rel="noopener" href="https://datawhalechina.github.io/agentic-rl-lab/experiments/pytrio-jev/">PyTrio-Jev：一顿麦当劳早餐，人人皆可训练自己的 Jev 决策模型</a>。</p>
+<p>本次围绕类型化决策模型的核心设计（共享 state 一次前向、marker 单 token 定位、稀疏位置监督），完成了 2160 条数据的 LoRA 微调、受限 Softmax 推理以及基于温度缩放的概率校准。</p>
+<span id="more"></span>
+
+<h2 id="PyTrio-Jev"><a href="#PyTrio-Jev" class="headerlink" title="PyTrio-Jev"></a>PyTrio-Jev</h2><h3 id="Jev"><a href="#Jev" class="headerlink" title="Jev"></a>Jev</h3><p>Jev 是一个分类决策模型，给它一段 state 和一组带固定选项的 questions，它不生成开放回答，只返回选项及其概率，非常适合选项固定的业务场景。我个人认为的一个后续的可能发展就是通用大模型负责开放问题的推理规划等，然后决策模型来负责这种需要高频做选择的判断，然后在上层的策略来进行兜底。</p>
+<ul>
+<li><strong>通用零样本能力</strong>适合上来就能用、懒得标数据的场景；</li>
+<li>一旦落到<strong>选项固定、高频调用的具体业务</strong>里，哪怕只有一两千条业务数据，用一个轻量基座模型做 <strong>Specialist</strong>，效果可能也不错，而且推理成本更低。</li>
+</ul>
+<h3 id="核心设计"><a href="#核心设计" class="headerlink" title="核心设计"></a>核心设计</h3><p>PyTrio-Jev 通过稀疏位置监督将多字段决策整合进单次前向传播，避免逐字段重复计算或自回归生成带来的顺序依赖：</p>
+<ul>
+<li><strong>共享 state，一次前向</strong>：将一条记录的 <code>state</code> 与所有待决策问题拼接为同一个输入序列，在一次前向传播中同时监督所有字段。输入序列只包含题干和占位符，不含任何字段答案，因此字段之间互相看不到答案，不存在信息泄漏，问题的排列顺序也不影响输出概率。</li>
+<li><strong>marker 单 token 定位</strong>：不修改或扩充词表，直接复用词表内的普通 token <code>decision</code>（ID <code>61781</code>）作为每个字段的占位符。训练时依靠该 token 定位监督位置，推理时依靠它定位读取位置。<strong>为什么不新建 <code>&lt;|decision|&gt;</code> 这种 special token？</strong> 因为 PyTRIO 服务端词表不可扩展，不能扩 embedding；而 <code>&quot;decision&quot;</code> 在 Qwen3.5 词表里刚好是<strong>单个 token（id <code>61781</code>）</strong>，且被 JSON 双引号包住，不会和相邻字符发生 BPE 合并。</li>
+<li><strong>Datum 构造与稀疏监督</strong>：基于自回归模型第 <script type="math/tex">i</script> 个位置预测第 <script type="math/tex">i+1</script> 个 token 的机制，计算 <code>cross_entropy</code> loss 时，<code>target_tokens</code>（对应字段的真实选项 token）和 <code>weights = 1.0</code> 仅落在每个 <code>decision</code> marker 的<strong>前一位置</strong>，其余位置（包括 <code>state</code>、题干及 marker 本身）权重全为 <code>0.0</code>。模型直接复用预训练的上下文表示能力，梯度全部集中用于学习决策位置的选择判断。</li>
+</ul>
+<p>以同一条 <code>state</code> 下包含两个问题（答案分别为 <code>A</code>、<code>2</code>）的序列为例，<code>Datum</code> 对齐方式如下：</p>
+<table>
+<thead>
+<tr>
+<th align="left">序列位置</th>
+<th align="center"><code>state + 题1大部分</code></th>
+<th align="center">题1末尾（marker1 前一位）</th>
+<th align="center"><code>decision</code> (61781)</th>
+<th align="center"><code>题2大部分</code></th>
+<th align="center">题2末尾（marker2 前一位）</th>
+<th align="center"><code>decision</code> (61781)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>model_input</code></td>
+<td align="center"><code>...</code></td>
+<td align="center">题1末尾 token</td>
+<td align="center"><code>decision</code></td>
+<td align="center"><code>...</code></td>
+<td align="center">题2末尾 token</td>
+<td align="center"><code>decision</code></td>
+</tr>
+<tr>
+<td align="left"><code>target_tokens</code></td>
+<td align="center"><code>0</code></td>
+<td align="center"><code>A</code></td>
+<td align="center"><code>0</code></td>
+<td align="center"><code>0</code></td>
+<td align="center"><code>2</code></td>
+<td align="center"><code>0</code></td>
+</tr>
+<tr>
+<td align="left"><code>weights</code></td>
+<td align="center"><code>0.0</code></td>
+<td align="center"><code>1.0</code></td>
+<td align="center"><code>0.0</code></td>
+<td align="center"><code>0.0</code></td>
+<td align="center"><code>1.0</code></td>
+<td align="center"><code>0.0</code></td>
+</tr>
+</tbody></table>
+<p>推理时输入相同格式的无答案序列，读取每个 <code>decision</code> marker 前一位置输出的 logits 并在候选选项上计算概率分布，即可在单次前向传播中同时得到所有字段的决策结果。</p>
+<h3 id="推理"><a href="#推理" class="headerlink" title="推理"></a>推理</h3><p>推理的时候不采样文本：<code>sample(max_tokens=1, topk_prompt_logprobs=K)</code> 直接在 marker 位置读回候选符号的 logprob，只在这几个候选上做 softmax（并除以校准温度 T）。推理代码不去全词表里选字生成，而是直接拿着选项的 token ID，从这 15 万维的 logits 里<strong>只切片取出 <code>[&quot;A&quot;, &quot;B&quot;, &quot;C&quot;]</code> 等这几个位置的打分</strong>，其余 14 万多个词直接忽略（等价于概率屏蔽为 0）。</p>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/agentic-rl-pytrio-jev/inference-principle.png" alt="受限 Softmax 推理：marker 位读出候选分布"></p>
+<p>三种题型共用这一个机制，只是输出映射不同：</p>
+<table>
+<thead>
+<tr>
+<th>题型</th>
+<th>候选符号</th>
+<th>输出</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>choice</code>（多选一）</td>
+<td>A&#x2F;B&#x2F;C&#x2F;…</td>
+<td>argmax 选项 + 概率分布</td>
+</tr>
+<tr>
+<td><code>noul</code>（是否判断）</td>
+<td>Yes&#x2F;No</td>
+<td>p(Yes)</td>
+</tr>
+<tr>
+<td><code>score</code>（打分）</td>
+<td>1&#x2F;2&#x2F;3&#x2F;4&#x2F;5</td>
+<td>期望分 + 概率分布</td>
+</tr>
+</tbody></table>
+<p>因为输出永远是一个归一化的概率分布，下游可以直接拿它做阈值判断、灰度放行、意图识别、工单路由等等。</p>
+<h3 id="微调"><a href="#微调" class="headerlink" title="微调"></a>微调</h3><h4 id="训练集"><a href="#训练集" class="headerlink" title="训练集"></a>训练集</h4><table>
+<thead>
+<tr>
+<th>数据</th>
+<th>规模</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>LocalLLaMA/typed-decisions</code> train split</td>
+<td>960 案例（4800 题）</td>
+<td>4 个 workflow × 300 案例，案例级切出 240&#x2F;30&#x2F;30（train&#x2F;dev&#x2F;calibration）后用于训练；覆盖 choice&#x2F;score&#x2F;noul</td>
+</tr>
+<tr>
+<td><code>Team-ACE/ToolACE</code></td>
+<td>1200 条</td>
+<td><strong>先剔除 310 条评测行再采样</strong>；转换为”给定请求和工具列表，选哪个工具”的 choice 题</td>
+</tr>
+</tbody></table>
+<p>合计 <strong>2160 条记录、6000 个决策题</strong>。noul 题型的训练信号只来自 typed-decisions（ToolACE 是纯 choice），这个偏科后面会看到影响。</p>
+<ul>
+<li>typed-decisions 的 train&#x2F;test 是官方独立生成的（不同 seed、train id 带 <code>tr_</code> 前缀），直接”train 训、test 评”；</li>
+<li>ToolACE 的 310 条评测行、Jevbench 全部 231 条<strong>一律不进训练</strong>；跨划分另做 state 文本哈希查重；</li>
+<li>温度只在校准划分上拟合；测试集在所有决策（checkpoint、T）冻结之后才读。<code>dev.jsonl</code> 120 条留给未来做 checkpoint 选择。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 0. 克隆仓库 + 安装依赖 + 登录</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/datawhalechina/agentic-rl-lab.git</span><br><span class="line"><span class="built_in">cd</span> agentic-rl-lab</span><br><span class="line">uv <span class="built_in">sync</span></span><br><span class="line">trio login       <span class="comment"># PyTRIO 训练服务（必需）</span></span><br><span class="line">swanlab login    <span class="comment"># SwanLab 训练曲线（可选，也可用 --swanlab-mode offline）</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 下载并切分全部数据（训练 2160 条 + 五项评测集）</span></span><br><span class="line">uv run python experiments/pytrio-jev/00-prepare-data.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 冒烟：64 条跑 1 个 epoch，确认 loss 下降、marker 对齐正常</span></span><br><span class="line">uv run python experiments/pytrio-jev/train.py --max-samples 64 --epochs 1 --save-every 0 --swanlab-mode offline</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 正式训练：2160 条 × 2 epoch ÷ 16 = 270 步</span></span><br><span class="line">uv run python experiments/pytrio-jev/train.py --epochs 2 --batch-size 16 --save-every 60 --swanlab-mode online</span><br></pre></td></tr></table></figure>
+
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/agentic-rl-pytrio-jev/swanlab-training-metrics.png" alt="SwanLab 训练曲线与 token 监督指标"></p>
+<h3 id="校准"><a href="#校准" class="headerlink" title="校准"></a>校准</h3><p>决策模型输出的是概率，我们希望它说有 80% 的概率的时候是真的大约有 80% 的概率，这里就会用到两个常用的度量：</p>
+<ul>
+<li><strong>ECE</strong>（Expected Calibration Error，期望校准误差）：把预测按置信度分桶，比较每桶的置信度和实际准确率的差距，越小越好。<ul>
+<li>计算方式：将样本按最高选项的概率（置信度 <script type="math/tex">\hat p_i</script>）等距分入 <script type="math/tex">M</script> 个桶 <script type="math/tex">B_m</script>，计算每桶内平均准确率 <script type="math/tex">\text{acc}(B_m)</script> 与平均置信度 <script type="math/tex">\text{conf}(B_m)</script> 的绝对差，再按桶内样本占比加权求和：<script type="math/tex; mode=display">\text{ECE} = \sum_{m=1}^{M} \frac{|B_m|}{N} \left| \text{acc}(B_m) - \text{conf}(B_m) \right|</script></li>
+<li>例：10 题中有 6 题置信度落在 <script type="math/tex">[0.8, 0.9)</script>，均值 0.85，但实际只答对 4 题（准确率 0.667），该桶贡献误差 <script type="math/tex">\frac{6}{10} \times |0.667 - 0.85|</script>。ECE 只衡量置信度与实际命中率是否匹配，若模型均匀乱猜且命中率接近该低概率，ECE 也能很低。</li>
+</ul>
+</li>
+<li><strong>Brier 分数</strong>：预测概率分布与真实标签的均方误差，同时惩罚”答错”和”自信地答错”，越小越好。<ul>
+<li>计算方式：设共有 <script type="math/tex">N</script> 题、<script type="math/tex">K</script> 个选项，<script type="math/tex">\mathbf{p}_i</script> 为预测概率向量，<script type="math/tex">\mathbf{y}_i</script> 为真实标签的 One-hot 向量（正确选项为 1，其余为 0）：<script type="math/tex; mode=display">\text{Brier} = \frac{1}{N} \sum_{i=1}^{N} \sum_{k=1}^{K} (p_{i,k} - y_{i,k})^2</script></li>
+<li>例：3 选题真实标签为 <code>[1, 0, 0]</code>。预测 <code>[0.90, 0.05, 0.05]</code>（答对且自信）得分为 <code>0.015</code>；预测 <code>[0.40, 0.50, 0.10]</code>（答错但置信度低）得分为 <code>0.620</code>；预测 <code>[0.05, 0.90, 0.05]</code>（自信地答错）得分升至 <code>1.715</code>。Brier 同时考核分类准确度与校准度，常与 ECE 配合使用。</li>
+</ul>
+</li>
+</ul>
+<p>具体校准做法是在 120 案例 &#x2F; 600 题的 calibration 划分上做温度缩放（Temperature Scaling）：对逆温度 <script type="math/tex">\beta = 1/T</script> 二分搜索使 <strong>NLL</strong> 最小，拟合得到 <script type="math/tex">T = 1.05</script>（<code>1.0498</code>），NLL 从 <code>0.4662</code> 降到 <code>0.4657</code>。以下是我拟合后最终的结果：</p>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/agentic-rl-pytrio-jev/calibration-result.png" alt="Calibration 划分温度缩放拟合结果"></p>
+<ul>
+<li><strong>NLL（Negative Log-Likelihood，负对数似然）</strong>：在分类任务中等价于交叉熵损失，衡量模型对真实答案 <script type="math/tex">y_i</script> 分配的预测概率 <script type="math/tex">p_i(y_i)</script>，越小越好：<script type="math/tex; mode=display">\text{NLL} = -\frac{1}{N} \sum_{i=1}^{N} \log p_i(y_i)</script></li>
+<li><strong>优化原理</strong>：ECE 因分桶不可微不适合直接作为优化目标，而 NLL 平滑连续且关于逆温度 <script type="math/tex">\beta</script> 为凸函数，可用二分搜索求得全局最优解。<script type="math/tex">T = 1.05</script>（大于 1）会拉平 <code>logits / T</code> 的分布，减轻模型在错误样本上过度自信带来的高额对数惩罚，使输出概率更贴近真实命中率。</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://bubble-xd.github.io">Bubble</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://bubble-xd.github.io/2026/11/24/agentic-rl-pytrio-jev/">https://bubble-xd.github.io/2026/11/24/agentic-rl-pytrio-jev/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://bubble-xd.github.io" target="_blank">Bubble's Blogs</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Agentic-RL/">Agentic RL</a><a class="post-meta__tags" href="/tags/Datawhale/">Datawhale</a><a class="post-meta__tags" href="/tags/PyTrio-Jev/">PyTrio-Jev</a><a class="post-meta__tags" href="/tags/SFT/">SFT</a></div><div class="post-share"><div class="social-share" data-image="/image/%E5%A4%B4%E5%83%8F.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Bubble</div><div class="author-info-description">Seek the light to meet,walk in its glow</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">10</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">23</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/bubble-xd"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">你若盛开，蝴蝶自来</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#PyTrio-Jev"><span class="toc-number">1.</span> <span class="toc-text">PyTrio-Jev</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Jev"><span class="toc-number">1.1.</span> <span class="toc-text">Jev</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.2.</span> <span class="toc-text">核心设计</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E7%90%86"><span class="toc-number">1.3.</span> <span class="toc-text">推理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BE%AE%E8%B0%83"><span class="toc-number">1.4.</span> <span class="toc-text">微调</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E9%9B%86"><span class="toc-number">1.4.1.</span> <span class="toc-text">训练集</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%A1%E5%87%86"><span class="toc-number">1.5.</span> <span class="toc-text">校准</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/24/agentic-rl-pytrio-jev/" title="Datawhale Agentic RL Lab 学习笔记：PyTrio-Jev 决策模型实战">Datawhale Agentic RL Lab 学习笔记：PyTrio-Jev 决策模型实战</a><time datetime="2026-11-24T09:52:00.000Z" title="发表于 2026-11-24 17:52:00">2026-11-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/22/happy-llm-task02/" title="Happy-LLM Task02 学习笔记：Transformer 架构（2.1–2.2）">Happy-LLM Task02 学习笔记：Transformer 架构（2.1–2.2）</a><time datetime="2026-11-22T10:08:00.000Z" title="发表于 2026-11-22 18:08:00">2026-11-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/21/agentic-rl-task03/" title="Datawhale Agentic RL Lab Task03 学习笔记：Vision GRPO 与 GeoQA 实战">Datawhale Agentic RL Lab Task03 学习笔记：Vision GRPO 与 GeoQA 实战</a><time datetime="2026-11-21T10:06:00.000Z" title="发表于 2026-11-21 18:06:00">2026-11-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/20/agentic-rl-task02/" title="Datawhale Agentic RL Lab Task02 学习笔记：损失函数与 GRPO 实战">Datawhale Agentic RL Lab Task02 学习笔记：损失函数与 GRPO 实战</a><time datetime="2026-11-20T13:38:00.000Z" title="发表于 2026-11-20 21:38:00">2026-11-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/18/happy-llm-task01/" title="Happy-LLM Task01 学习笔记：NLP 基础概念">Happy-LLM Task01 学习笔记：NLP 基础概念</a><time datetime="2026-11-17T16:00:00.000Z" title="发表于 2026-11-18 00:00:00">2026-11-18</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(/image/%E8%83%8C%E6%99%AF.jpg);"><div class="footer-other"><nav class="footer-study-links" aria-label="学习笔记"><a href="/tags/Happy-LLM/">Happy-LLM</a></nav><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Bubble</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z\d\-\.\+]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(t.test(e.href)||r.test(e.href))&&(e.href=a.dataset.original)})});</script><script>(r=>{r.imageLazyLoadSetting.processImages=t;var a=r.imageLazyLoadSetting.isSPA,o=r.imageLazyLoadSetting.preloadRatio||1,d=i();function i(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(t){(a||t)&&(d=i());for(var e,n=0;n<d.length;n++)0<=(e=(e=d[n]).getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(r.innerHeight*o||document.documentElement.clientHeight*o)&&(()=>{var t,e,a,o,i=d[n];e=function(){d=d.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).dataset.loaded||(t.hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(a=new Image,o=t.getAttribute("data-original"),a.onload=function(){t.src=o,t.removeAttribute("data-original"),t.setAttribute("data-loaded",!0),e&&e()},a.onerror=function(){t.removeAttribute("data-original"),t.setAttribute("data-loaded",!1),t.src=o},t.src!==o&&(a.src=o)))})()}function e(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",e),r.addEventListener("resize",e),r.addEventListener("orientationchange",e)})(this);</script></body></html>
