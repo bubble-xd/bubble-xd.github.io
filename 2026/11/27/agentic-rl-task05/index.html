@@ -1,0 +1,307 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Datawhale Agentic RL Lab Task05 学习笔记：General OPD 实战与同步/异步对比 | Bubble's Blogs</title><meta name="author" content="Bubble"><meta name="copyright" content="Bubble"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="这篇是 Datawhale Agentic RL Lab 组队学习的第五篇笔记，承接 Task04 的 General OPD 原理，进一步拆解官方实战脚本 General OPD（01-demo-sync.py 与 02-demo-async.py），对比 GRPO 实战差异，并结合 10 步同步试跑的 SwanLab 监控曲线分析同步版的瓶颈与异步版的并发改造。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Datawhale Agentic RL Lab Task05 学习笔记：General OPD 实战与同步&#x2F;异步对比">
+<meta property="og:url" content="https://bubble-xd.github.io/2026/11/27/agentic-rl-task05/index.html">
+<meta property="og:site_name" content="Bubble&#39;s Blogs">
+<meta property="og:description" content="这篇是 Datawhale Agentic RL Lab 组队学习的第五篇笔记，承接 Task04 的 General OPD 原理，进一步拆解官方实战脚本 General OPD（01-demo-sync.py 与 02-demo-async.py），对比 GRPO 实战差异，并结合 10 步同步试跑的 SwanLab 监控曲线分析同步版的瓶颈与异步版的并发改造。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://bubble-xd.github.io/image/%E5%A4%B4%E5%83%8F.jpg">
+<meta property="article:published_time" content="2026-11-27T05:30:00.000Z">
+<meta property="article:modified_time" content="2026-11-27T05:30:46.875Z">
+<meta property="article:author" content="Bubble">
+<meta property="article:tag" content="Agentic RL">
+<meta property="article:tag" content="Datawhale">
+<meta property="article:tag" content="OPD">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bubble-xd.github.io/image/%E5%A4%B4%E5%83%8F.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Datawhale Agentic RL Lab Task05 学习笔记：General OPD 实战与同步/异步对比",
+  "url": "https://bubble-xd.github.io/2026/11/27/agentic-rl-task05/",
+  "image": "https://bubble-xd.github.io/image/%E5%A4%B4%E5%83%8F.jpg",
+  "datePublished": "2026-11-27T05:30:00.000Z",
+  "dateModified": "2026-11-27T05:30:46.875Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Bubble",
+      "url": "https://bubble-xd.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/image/ico.jpg"><link rel="canonical" href="https://bubble-xd.github.io/2026/11/27/agentic-rl-task05/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Datawhale Agentic RL Lab Task05 学习笔记：General OPD 实战与同步/异步对比',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">13</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/image/%E8%83%8C%E6%99%AF.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">Bubble's Blogs</span></a><a class="nav-page-title" href="/"><span class="site-name">Datawhale Agentic RL Lab Task05 学习笔记：General OPD 实战与同步/异步对比</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Datawhale Agentic RL Lab Task05 学习笔记：General OPD 实战与同步/异步对比</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-27T05:30:00.000Z" title="发表于 2026-11-27 13:30:00">2026-11-27</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-27T05:30:46.875Z" title="更新于 2026-11-27 13:30:46">2026-11-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/LLM/">LLM</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/LLM/Agentic-RL/">Agentic RL</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>5分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>这篇是 Datawhale Agentic RL Lab 组队学习的第五篇笔记，承接 <a href="/2026/11/25/agentic-rl-task04/">Task04</a> 的 General OPD 原理，进一步拆解官方实战脚本 <a target="_blank" rel="noopener" href="https://datawhalechina.github.io/agentic-rl-lab/experiments/general-opd/">General OPD</a>（<code>01-demo-sync.py</code> 与 <code>02-demo-async.py</code>），对比 GRPO 实战差异，并结合 10 步同步试跑的 SwanLab 监控曲线分析同步版的瓶颈与异步版的并发改造。</p>
+<span id="more"></span>
+
+<h2 id="OPD-实战"><a href="#OPD-实战" class="headerlink" title="OPD 实战"></a>OPD 实战</h2><p>读完 <code>experiments/general-opd/01-demo-sync.py</code>，核心是看 <a href="/2026/11/25/agentic-rl-task04/">task04</a> 里的 On-Policy Distillation 原理怎么落地成一个可运行的 PyTRIO 训练循环。它的整体骨架和 <a href="/2026/11/20/agentic-rl-task02/">GRPO 实战</a> 高度复用，重点在于弄清监督信号切换成 Teacher logprob 后，数据流、采样角色和训练表现发生了哪些变化。</p>
+<h3 id="训练闭环与核心逻辑"><a href="#训练闭环与核心逻辑" class="headerlink" title="训练闭环与核心逻辑"></a>训练闭环与核心逻辑</h3><p>整份脚本只把 DeepMath-103K 当作题目池（只取 <code>question</code> 字段，训练阶段不看标准答案），每一步按以下流程完成一次策略更新：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">刷新 student_sampler -&gt; 按 batch 渲染 prompt -&gt; Student 采样 completion 与 student_lps</span><br><span class="line">  -&gt; 拼接 prompt + completion 送 Teacher 算逐 token logprob 并切片出 teacher_lps</span><br><span class="line">  -&gt; 计算 reverse_kl 与 token 级 advantage -&gt; 右移构造 Datum</span><br><span class="line">  -&gt; forward_backward(importance_sampling) + optim_step 更新 Student LoRA</span><br></pre></td></tr></table></figure>
+
+<p>最关键的一段逻辑集中在内层轨迹处理：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">student_lps = [<span class="built_in">float</span>(x) <span class="keyword">for</span> x <span class="keyword">in</span> seq.logprobs]</span><br><span class="line">teacher_lps = completion_teacher_logprobs(teacher_client, prompt_ids, ids)</span><br><span class="line"></span><br><span class="line">reverse_kl = np.asarray(student_lps) - np.asarray(teacher_lps)</span><br><span class="line">advantages = -args.kl_penalty_coef * reverse_kl</span><br><span class="line">datums.append(build_opd_datum(prompt_ids, ids, student_lps, advantages))</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>三个客户端各自的分工</strong>：<code>training_client</code> 持有 Student（默认 <code>Qwen/Qwen3.5-4B</code>）的可训练 LoRA 参数；<code>student_sampler</code> 由 <code>training_client</code> 导出，负责产出当前策略下的回答；<code>teacher_client</code>（默认 <code>Qwen/Qwen3.8-27B</code>）始终冻结，只对 Student 已经生成的完整轨迹调用 <code>compute_logprobs</code>。</li>
+<li><strong>Teacher 打分对齐</strong>：必须把 <code>prompt_ids + completion_ids</code> 拼成完整上下文再算 <code>compute_logprobs</code>，然后取 <code>all_logprobs[len(prompt_ids):]</code>，保证 Teacher 是在与 Student 完全一致的历史前缀下评价每一个生成 token。同时脚本严格校验切片长度一致且不含 <code>None</code>，这要求 Student 和 Teacher 必须共享兼容的 tokenizer。</li>
+</ul>
+<h3 id="与-GRPO-实战的关键差异"><a href="#与-GRPO-实战的关键差异" class="headerlink" title="与 GRPO 实战的关键差异"></a>与 GRPO 实战的关键差异</h3><p>相比之前跑过的 GRPO 同步脚本，OPD 复用了一样的 <code>Datum</code> 右移掩码（<code>len(prompt_ids) - 1</code>）和 <code>importance_sampling</code> 更新接口，核心差别在三处：</p>
+<table>
+<thead>
+<tr>
+<th align="left">对比维度</th>
+<th align="left">GRPO（<code>task02</code>）</th>
+<th align="left">General OPD（<code>01-demo-sync.py</code>）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">监督信号来源</td>
+<td align="left">本地规则核对标准答案（0&#x2F;1 Reward）</td>
+<td align="left">冻结 Teacher 对轨迹的逐 token logprob</td>
+</tr>
+<tr>
+<td align="left">Advantage 粒度</td>
+<td align="left">序列级：同一条回答所有 token 共用同一个标量优势</td>
+<td align="left">Token 级：每个 completion token 各自有独立的 <script type="math/tex">-\beta \cdot k_t</script>（即 <code>-beta * reverse_kl</code>）</td>
+</tr>
+<tr>
+<td align="left"><code>group_size</code> 作用</td>
+<td align="left">必须大于 1 才能算组内相对优势，同组全对&#x2F;全错会导致退化</td>
+<td align="left">无需组内归一化，即使 <code>group_size=1</code> 也能产生有效梯度</td>
+</tr>
+</tbody></table>
+<p>这一点在 <code>build_opd_datum</code> 里最明显：GRPO 往 <code>padded_advantages</code> 填的是 <code>[sample.advantage] * len(tokens)</code>（整条回复同涨同跌），而 OPD 填的是逐位列表 <code>list(advantages)</code>（同一条回复里，Teacher 赞同的 token 会被拉高，不赞同的 token 会被压低）。</p>
+<h3 id="同步版实验结果分析"><a href="#同步版实验结果分析" class="headerlink" title="同步版实验结果分析"></a>同步版实验结果分析</h3><p>本次使用同步版跑完 10 步试跑（Step 0–9，<code>batch_size=4</code>、<code>group_size=4</code>、<code>max_tokens=512</code>、学习率恒定 <code>4e-5</code>），SwanLab 曲线如下：</p>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/agentic-rl-task05/swanlab-data-metrics.png" alt="SwanLab 数据量、生成长度与采样速率曲线"></p>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/agentic-rl-task05/swanlab-opd-kl.png" alt="SwanLab OPD Reverse KL 与学习率曲线"></p>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/agentic-rl-task05/swanlab-trainer-loss.png" alt="SwanLab 单步耗时与 Trainer Loss 曲线"></p>
+<ul>
+<li><strong>全部回答触及长度上限</strong>：<code>data/datums</code> 稳定在 <code>16</code>（无空序列跳过），但 <code>data/completion_tokens_mean</code> 全程是一条贴在 <code>512</code> 的直线（<code>completion_tokens_total</code> 恒为 <code>8192</code>）。这说明在 DeepMath 题目上，10 步内几乎所有样本都在写完前被 <code>max_tokens=512</code> 截断，后续评测需要放宽生成长度是不是效果会好？</li>
+<li><strong>Reverse KL 整体下移但单步波动明显</strong>：<code>opd/reverse_kl_mean</code> 从 Step 0 的约 <code>0.159</code> 下降到后期 <code>0.105–0.129</code> 区间（Step 6 为 <code>0.119</code>），<code>opd/reverse_kl_std</code> 同步从约 <code>0.74</code> 收窄到 <code>0.59–0.64</code>（Step 6 为 <code>0.5965</code>）。曲线出现起伏主要是因为每步只抽 4 道不同的题目，题目难度差异会直接拉动 KL 均值，加上总步数只有 10 步，仍处在初期对齐阶段。</li>
+<li><strong>Loss 走势与 Token 统计</strong>：严格 on-policy 下 importance ratio 接近 1，因此 <code>trainer/loss_mean</code>（约 <code>0.084–0.141</code>）的形态基本跟着 <code>opd/reverse_kl_mean</code> 走；<code>trainer/token_count</code>（约 <code>9200–10450</code>）比恒定的 <code>8192</code> 多出的 <code>1000–2200</code> 个 token，正好对应每步 16 条样本里随题目变化的 prompt 长度。</li>
+<li><strong>单步耗时波动大</strong>：串行等待叠加远端波动导致耗时不稳定。</li>
+</ul>
+<h3 id="同步版局限"><a href="#同步版局限" class="headerlink" title="同步版局限"></a>同步版局限</h3><ul>
+<li><strong>串行网络往返是主要耗时瓶颈</strong>：同步版外层按 <code>batch_size</code> 串行等待 Student 采样 <code>.result()</code>，内层又对每条 <code>seq</code> 串行等待 Teacher 打分 <code>.result()</code>。按本次 <code>4 × 4</code> 配置，每步要串行等 4 次采样加 16 次 Teacher 打分，放大 batch 后耗时会线性拉长。</li>
+<li><strong>短截断限制推理完整度</strong>：在 <code>max_tokens=512</code> 下样本被全部截断，Teacher 只能对前半段未完成的推理过程给 KL 信号，难以覆盖到最终得出 <code>\boxed&#123;&#125;</code> 答案的收尾步骤。</li>
+<li><strong>KL 下降不代表正确率必然上升</strong>：<code>opd/reverse_kl_mean</code> 下降只说明 Student 的输出分布更接近 Teacher，实际数学解题准确率仍需用导出的 LoRA 权重单独验证。</li>
+<li><strong>On-policy 严格度受刷新间隔制约</strong>：<code>sampler_refresh_steps=1</code> 保证每步严格 on-policy，但每步都要同步一次采样权重；若为省开销调大该值，间隔内会退化为轻微 off-policy，依赖 <code>importance_sampling</code> 纠偏。</li>
+</ul>
+<h3 id="异步版（02-demo-async-py）的主要区别"><a href="#异步版（02-demo-async-py）的主要区别" class="headerlink" title="异步版（02-demo-async.py）的主要区别"></a>异步版（<code>02-demo-async.py</code>）的主要区别</h3><p>异步版与同步版在算法上完全一致（同样的数据加载、Reverse KL 公式、<code>Datum</code> 右移和 <code>importance_sampling</code> 更新），核心改动全在<strong>并发调度</strong>上：</p>
+<table>
+<thead>
+<tr>
+<th align="left">对比项</th>
+<th align="left">同步版（<code>01-demo-sync.py</code>）</th>
+<th align="left">异步版（<code>02-demo-async.py</code>）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Prompt 级采样</td>
+<td align="left"><code>for row in batch</code> 逐题 <code>sample().result()</code></td>
+<td align="left"><code>asyncio.gather</code> 并发提交整批 <code>run_prompt_rollout</code></td>
+</tr>
+<tr>
+<td align="left">Teacher 逐轨迹打分</td>
+<td align="left"><code>for seq in sequences</code> 逐条 <code>compute_logprobs().result()</code></td>
+<td align="left">单题内再用 <code>asyncio.gather</code> 并发执行 <code>compute_logprobs_async</code></td>
+</tr>
+<tr>
+<td align="left">SDK 调用方式</td>
+<td align="left">同步阻塞接口（<code>create_*</code> &#x2F; <code>sample</code> &#x2F; <code>forward_backward</code>）</td>
+<td align="left">全套 <code>*_async</code> 异步接口，用 <code>asyncio.run(main(...))</code> 驱动</td>
+</tr>
+<tr>
+<td align="left">远端更新排队</td>
+<td align="left">连续调用 <code>forward_backward</code> 与 <code>optim_step</code> 后 <code>.result()</code></td>
+<td align="left">先 <code>await *_async</code> 拿到两个 future，再依次 <code>await</code> 等待完成</td>
+</tr>
+</tbody></table>
+<p>本质上，异步版通过<strong>外层多题并发 + 内层多条轨迹并发打分</strong>，把原本 <code>batch_size + batch_size * group_size</code> 次串行等待折叠成两段并发等待，同时补充了 <code>student_lps</code> 与 <code>completion_ids</code> 的长度一致性校验，适合在更大 <code>batch_size</code> 和 <code>group_size</code> 下压低单步耗时。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://bubble-xd.github.io">Bubble</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://bubble-xd.github.io/2026/11/27/agentic-rl-task05/">https://bubble-xd.github.io/2026/11/27/agentic-rl-task05/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://bubble-xd.github.io" target="_blank">Bubble's Blogs</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Agentic-RL/">Agentic RL</a><a class="post-meta__tags" href="/tags/Datawhale/">Datawhale</a><a class="post-meta__tags" href="/tags/OPD/">OPD</a></div><div class="post-share"><div class="social-share" data-image="/image/%E5%A4%B4%E5%83%8F.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/image/%E5%A4%B4%E5%83%8F.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Bubble</div><div class="author-info-description">Seek the light to meet,walk in its glow</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">13</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/bubble-xd"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">你若盛开，蝴蝶自来</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#OPD-%E5%AE%9E%E6%88%98"><span class="toc-number">1.</span> <span class="toc-text">OPD 实战</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E9%97%AD%E7%8E%AF%E4%B8%8E%E6%A0%B8%E5%BF%83%E9%80%BB%E8%BE%91"><span class="toc-number">1.1.</span> <span class="toc-text">训练闭环与核心逻辑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8E-GRPO-%E5%AE%9E%E6%88%98%E7%9A%84%E5%85%B3%E9%94%AE%E5%B7%AE%E5%BC%82"><span class="toc-number">1.2.</span> <span class="toc-text">与 GRPO 实战的关键差异</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E7%89%88%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C%E5%88%86%E6%9E%90"><span class="toc-number">1.3.</span> <span class="toc-text">同步版实验结果分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E7%89%88%E5%B1%80%E9%99%90"><span class="toc-number">1.4.</span> <span class="toc-text">同步版局限</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5%E7%89%88%EF%BC%8802-demo-async-py%EF%BC%89%E7%9A%84%E4%B8%BB%E8%A6%81%E5%8C%BA%E5%88%AB"><span class="toc-number">1.5.</span> <span class="toc-text">异步版（02-demo-async.py）的主要区别</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/27/agentic-rl-task05/" title="Datawhale Agentic RL Lab Task05 学习笔记：General OPD 实战与同步/异步对比">Datawhale Agentic RL Lab Task05 学习笔记：General OPD 实战与同步/异步对比</a><time datetime="2026-11-27T05:30:00.000Z" title="发表于 2026-11-27 13:30:00">2026-11-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/26/happy-llm-task03/" title="Happy-LLM Task03 学习笔记：搭建一个 Transformer（2.3）">Happy-LLM Task03 学习笔记：搭建一个 Transformer（2.3）</a><time datetime="2026-11-26T09:43:00.000Z" title="发表于 2026-11-26 17:43:00">2026-11-26</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/25/agentic-rl-task04/" title="Datawhale Agentic RL Lab Task04 学习笔记：General OPD 原理与实战">Datawhale Agentic RL Lab Task04 学习笔记：General OPD 原理与实战</a><time datetime="2026-11-25T14:58:00.000Z" title="发表于 2026-11-25 22:58:00">2026-11-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/24/agentic-rl-pytrio-jev/" title="Datawhale Agentic RL Lab 学习笔记：PyTrio-Jev 决策模型实战">Datawhale Agentic RL Lab 学习笔记：PyTrio-Jev 决策模型实战</a><time datetime="2026-11-24T09:52:00.000Z" title="发表于 2026-11-24 17:52:00">2026-11-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/22/happy-llm-task02/" title="Happy-LLM Task02 学习笔记：Transformer 架构（2.1–2.2）">Happy-LLM Task02 学习笔记：Transformer 架构（2.1–2.2）</a><time datetime="2026-11-22T10:08:00.000Z" title="发表于 2026-11-22 18:08:00">2026-11-22</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(/image/%E8%83%8C%E6%99%AF.jpg);"><div class="footer-other"><nav class="footer-study-links" aria-label="学习笔记"><a href="/tags/Happy-LLM/">Happy-LLM</a></nav><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Bubble</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z\d\-\.\+]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(t.test(e.href)||r.test(e.href))&&(e.href=a.dataset.original)})});</script><script>(r=>{r.imageLazyLoadSetting.processImages=t;var a=r.imageLazyLoadSetting.isSPA,o=r.imageLazyLoadSetting.preloadRatio||1,d=i();function i(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(t){(a||t)&&(d=i());for(var e,n=0;n<d.length;n++)0<=(e=(e=d[n]).getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(r.innerHeight*o||document.documentElement.clientHeight*o)&&(()=>{var t,e,a,o,i=d[n];e=function(){d=d.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).dataset.loaded||(t.hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(a=new Image,o=t.getAttribute("data-original"),a.onload=function(){t.src=o,t.removeAttribute("data-original"),t.setAttribute("data-loaded",!0),e&&e()},a.onerror=function(){t.removeAttribute("data-original"),t.setAttribute("data-loaded",!1),t.src=o},t.src!==o&&(a.src=o)))})()}function e(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",e),r.addEventListener("resize",e),r.addEventListener("orientationchange",e)})(this);</script></body></html>
